@@ -1,6 +1,68 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import moment = require('moment');
+declare var  $
+
+export interface MyError extends Error {
+    xhr?
+    xhr_status?
+    xhr_error?
+}
+
+export var XHR_ERROR = 'XhrError';
+
+export var ajax_error_msg = function (jqXHR) {
+    /**
+     * Return a JSON error message if there is one,
+     * otherwise the basic HTTP status text.
+     */
+    if (jqXHR.responseJSON && jqXHR.responseJSON.traceback) {
+        return jqXHR.responseJSON.traceback;
+    } else if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+        return jqXHR.responseJSON.message;
+    } else {
+        return jqXHR.statusText;
+    }
+};
+
+export var wrap_ajax_error = function (jqXHR, status, error) {
+    var wrapped_error = <MyError>(new Error(ajax_error_msg(jqXHR)));
+    wrapped_error.name =  XHR_ERROR;
+    // provide xhr response
+    wrapped_error.xhr = jqXHR;
+    wrapped_error.xhr_status = status;
+    wrapped_error.xhr_error = error;
+    return wrapped_error;
+};
+
+export var log_ajax_error = function(jqXHR, status, error) {
+    /**
+     * log ajax failures with informative messages
+     */
+    var msg = "API request failed (" + jqXHR.status + "): ";
+    console.log(jqXHR);
+    msg += ajax_error_msg(jqXHR);
+    console.log(msg);
+}
+
+export var promising_ajax = function(url, settings) {
+    /**
+     * Like $.ajax, but returning an ES6 promise. success and error settings
+     * will be ignored.
+     */
+    settings = settings || {};
+    return new Promise(function(resolve, reject) {
+        settings.success = function(data, status, jqXHR) {
+            resolve(data);
+        };
+        settings.error = function(jqXHR, status, error) {
+            log_ajax_error(jqXHR, status, error);
+            reject(wrap_ajax_error(jqXHR, status, error));
+        };
+        $.ajax(url, settings);
+    });
+};
 
 /**
  * Copy the contents of one object to another, recursively.
@@ -37,6 +99,20 @@ function uuid(): string {
   s[16] = hexDigits.charAt((Number(s[16]) & 0x3) | 0x8);  // bits 6-7 of the clock_seq_hi_and_reserved to 01
   return s.join("");
 }
+
+/**
+* Like os.path.split for URLs.
+* Always returns two strings, the directory path and the base filename
+*/
+export var urlPathSplit = function (path:string):string[] {
+
+    var idx = path.lastIndexOf('/');
+    if (idx === -1) {
+        return ['', path];
+    } else {
+        return [ path.slice(0, idx), path.slice(idx + 1) ];
+    }
+};
 
 
 /**
@@ -99,7 +175,7 @@ var browser: string[] = (() => {
 })();
 
 
-/** 
+/**
  * Return a serialized object string suitable for a query.
  *
  * http://stackoverflow.com/a/30707423
@@ -175,6 +251,50 @@ function ajaxRequest(url: string, settings: IAjaxSetttings): Promise<any> {
       req.send(settings.data);
     } else {
       req.send();
+    }
+  });
+}
+
+
+/**
+ * Log ajax failures with informative messages.
+ */
+export
+function logAjaxError(status: string) {
+  var msg = "API request failed (" + status + "): ";
+  console.log(msg);
+}
+
+
+declare
+function require(modules: string[], success: Function, reject?: Function): void;
+
+
+/**
+ * Try to load a class.
+ *
+ * Try to load a class from a module using require.js, if a module
+ * is specified, otherwise tries to load a class from the global
+ * registry, if the global registry is provided.
+ */
+export
+function loadClass(class_name: string, module_name: string, registry: { [string: string]: Function; }) {
+  return new Promise(function(resolve, reject) {
+    // Try loading the view module using require.js
+    if (module_name) {
+      require([module_name], (module: any) => {
+        if (module[class_name] === undefined) {
+          reject(new Error('Class ' + class_name + ' not found in module ' + module_name));
+        } else {
+          resolve(module[class_name]);
+        }
+      });
+    } else {
+      if (registry && registry[class_name]) {
+        resolve(registry[class_name]);
+      } else {
+        reject(new Error('Class ' + class_name + ' not found in registry '));
+      }
     }
   });
 }
