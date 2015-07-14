@@ -120,7 +120,7 @@ function jsonToQueryString(json: any): string {
 export
 interface IAjaxSetttings {
   method: string;
-  dataType: string;
+  dataType?: string;
   contentType?: string;
   data?: any;
 }
@@ -163,7 +163,8 @@ function ajaxRequest(url: string, settings: IAjaxSetttings): Promise<any> {
     }
     req.onload = () => {
       var response = req.response;
-      if (settings.dataType === 'json') {
+      if (settings.hasOwnProperty('dataType') && 
+          settings.dataType === 'json') {
         response = JSON.parse(req.response);
       }
       resolve({data: response, statusText: req.statusText, xhr: req});
