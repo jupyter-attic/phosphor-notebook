@@ -2,31 +2,30 @@
 // Distributed under the terms of the Modified BSD License.
 //
 "use strict";
-declare var  $
 import utils = require('./utils');
 import gapiutils = require('./gapiutils');
 import driveutils = require('./driveutils');
 import notebook_model = require('./notebook_model');
-import iface = require('content-interface');
+import iface = require('./content_interface');
 
 import Notebook = notebook_model.Notebook;
 import Path = iface.Path
 import IContents = iface.IContents
 import CheckpointId = iface.CheckpointId
 
-declare var gapi;
+declare var gapi:any;
 
 /**
  * Takes a contents model and converts it into metadata and bytes for
  * Google Drive upload.
  */
-var contentsModelToMetadataAndBytes = function(model):[any, string] {
+var contentsModelToMetadataAndBytes = function(model:any):[any, string] {
     var content = model.content;
     var mimetype = model.mimetype;
     var format = model.format;
     if (model['type'] === 'notebook') {
         // This seem to be wrong content is Notebook here. string below
-        content = notebook_model.notebook_json_contents_from_notebook(content);
+        content = notebook_model.notebookJsonContentsFromNotebook(content);
         format = 'json';
         mimetype = driveutils.NOTEBOOK_MIMETYPE;
     } else if (model['type'] === 'file') {
@@ -44,7 +43,7 @@ var contentsModelToMetadataAndBytes = function(model):[any, string] {
         // instead of a Notebook Json model. This lead to double serialisation.
         // as typescript does not seem to catch that, let's be safe.
         if(typeof(content) === 'string'){
-          console.warn(new Error('(\\)(°,,°)(\\) blblblblbl you are stringifying a string, bailing out'))
+          console.warn(new Error('Stringifying a string, bailing out'))
         } else {
           content = JSON.stringify(content);
         }
@@ -80,7 +79,7 @@ var contentsModelToMetadataAndBytes = function(model):[any, string] {
  * @return {Object} IPEP 27 compliant contents model
  */
 // TODO remove contents ?
-var files_resource_to_contents_model = function(path:Path, resource, content?) {
+var files_resource_to_contents_model = function(path:Path, resource:any, content?:any) {
     var title = resource['title'];
     var mimetype = resource['mimeType'];
 
@@ -94,7 +93,7 @@ var files_resource_to_contents_model = function(path:Path, resource, content?) {
         title.indexOf(nbextension, title.length - nbextension.length) !== -1) {
         type = 'notebook';
         if( typeof content !== 'undefined'){
-            model_content = notebook_model.notebook_from_file_contents(content);
+            model_content = notebook_model.notebookFromFileContents(content);
         }
     } else {
         if( typeof content !== 'undefined'){
@@ -241,7 +240,7 @@ export class GoogleDriveContents implements IContents {
     get(path:Path, options:any) {
         var that = this;
         var metadata_prm = gapiutils.gapi_ready.then(
-            $.proxy(driveutils.getResourceForPath, this, path, driveutils.FileType.FILE));
+            driveutils.getResourceForPath.bind(this, path, iface.FileType.FILE));
         var contents_prm = metadata_prm.then(function(resource) {
             that._observe_file_resource(resource);
             return driveutils.getContents(resource, false);
@@ -299,7 +298,7 @@ export class GoogleDriveContents implements IContents {
         }
 
         var folder_id_prm = gapiutils.gapi_ready
-            .then($.proxy(driveutils.getIdForPath, this, path, driveutils.FileType.FOLDER))
+            .then(driveutils.getIdForPath.bind(this, path, iface.FileType.FOLDER))
         var filename_prm = folder_id_prm.then(function(resource){
             return driveutils.getNewFileName(resource, options['ext'] || default_ext, base_name);
         });
@@ -318,7 +317,7 @@ export class GoogleDriveContents implements IContents {
     delete(path:Path) {
         return gapiutils.gapi_ready
         .then(function() {
-            return driveutils.getIdForPath(path, driveutils.FileType.FILE);
+            return driveutils.getIdForPath(path, iface.FileType.FILE);
         })
         .then(function(file_id){
             return gapiutils.execute(gapi.client.drive.files.delete({'fileId': file_id}));
@@ -380,9 +379,9 @@ export class GoogleDriveContents implements IContents {
         var path_and_filename = <Path[]>utils.urlPathSplit(<string>path);
         var path = path_and_filename[0];
         var filename = path_and_filename[1];
-        return driveutils.getResourceForPath(<string>path, driveutils.FileType.FOLDER)
+        return driveutils.getResourceForPath(<string>path, iface.FileType.FOLDER)
         .then(function(folder_resource) {
-            return driveutils.getResourceForRelativePath(filename, driveutils.FileType.FILE, false, folder_resource['id'])
+            return driveutils.getResourceForRelativePath(filename, iface.FileType.FILE, false, folder_resource['id'])
             .then(function(file_resource) {
                 return that._save_existing(file_resource, model)
             }, function(error) {
@@ -415,7 +414,7 @@ export class GoogleDriveContents implements IContents {
     create_checkpoint(path:Path, options:any) {
         var that = this;
         return gapiutils.gapi_ready
-        .then($.proxy(driveutils.getIdForPath, this, path, driveutils.FileType.FILE))
+        .then(driveutils.getIdForPath.bind(this, path, iface.FileType.FILE))
         .then(function(file_id) {
             var revision_id = that._last_observed_revision[file_id];
             if (!revision_id) {
@@ -440,7 +439,7 @@ export class GoogleDriveContents implements IContents {
 
     restore_checkpoint(path:Path, checkpoint_id:CheckpointId, options) {
         var file_id_prm = gapiutils.gapi_ready
-        .then($.proxy(driveutils.getIdForPath, this, path, driveutils.FileType.FILE))
+        .then(driveutils.getIdForPath.bind(this, path, iface.FileType.FILE))
 
         var contents_prm = file_id_prm.then(function(file_id) {
             var request = gapi.client.drive.revisions.get({
@@ -463,7 +462,7 @@ export class GoogleDriveContents implements IContents {
 
     list_checkpoints(path:Path, options:any) {
         return gapiutils.gapi_ready
-        .then($.proxy(driveutils.getIdForPath, this, path, driveutils.FileType.FILE))
+        .then(driveutils.getIdForPath.bind( this, path, iface.FileType.FILE))
         .then(function(file_id) {
             var request = gapi.client.drive.revisions.list({'fileId': file_id });
             return gapiutils.execute(request);
@@ -505,7 +504,7 @@ export class GoogleDriveContents implements IContents {
     list_contents(path:Path, options):Promise<any>{
         var that = this;
         return gapiutils.gapi_ready
-        .then($.proxy(driveutils.getIdForPath, this, path, driveutils.FileType.FOLDER))
+        .then(driveutils.getIdForPath.bind(this, path, iface.FileType.FOLDER))
         .then(function(folder_id) {
             // Gets contents of the folder 1000 items at a time.  Google Drive
             // returns at most 1000 items in each call to drive.files.list.
@@ -538,10 +537,10 @@ export class GoogleDriveContents implements IContents {
             };
             return get_items([]);
         })
-        .then(function(items) {
-            var list = $.map(items, function(resource) {
+        .then(function(items:any[]) {
+            var list = items.map(function(resource, index) {
                 var fullpath = <Path>utils.urlPathJoin(<string>path, resource['title']);
-                return files_resource_to_contents_model(fullpath, resource)
+                return files_resource_to_contents_model(fullpath, resource);
             });
             return {content: list};
         });

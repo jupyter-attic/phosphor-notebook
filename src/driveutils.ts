@@ -6,8 +6,9 @@ import gapiutils = require('./gapiutils');
 import pickerutils = require('./pickerutils');
 
 
-import iface = require('content-interface');
+import iface = require('./content_interface');
 import Path = iface.Path
+import FileType = iface.FileType
 
 export var FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder';
 
@@ -18,7 +19,6 @@ export var MULTIPART_BOUNDARY = '-------314159265358979323846';
 declare var gapi;
 
 
-export enum FileType {FILE=1, FOLDER=2}
 
 
 /**

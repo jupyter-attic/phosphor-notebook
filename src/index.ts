@@ -16,24 +16,17 @@ export function main(): void {
       common_config:{}
 
     })
-    var mw = (<Mwin>window);
-    mw.content = ct;
     ct.get('AAAAA.ipynb',{}).then(function(data){
-      console.log(data)
       rerender(data.content)
     })
 };
 
 export function rerender(data?): void {
   var test = document.getElementById('nb');
-  (<Mwin>window).demo = demo;
   var notebook = data || demo.notebook;
-  //console.log("rerender with", notebook)
   render(NotebookComponent.Notebook(notebook), test);
 }
 
-(<Mwin>window).rerender = rerender;
-(<Mwin>window).contents = contents;
 /*
 
             this.session = new session.Session(options);

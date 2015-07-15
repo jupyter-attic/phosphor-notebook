@@ -8,7 +8,7 @@ import $ = require('jquery');
 
 import utils = require("base/js/utils");
 import Promises = require('es6-promise');
-import iface = require('content-interface');
+import iface = require('./content_interface');
 
 import IContents = iface.IContents;
 import Path = iface.Path;
