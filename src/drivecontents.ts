@@ -152,7 +152,7 @@ export class GoogleDriveContents implements IContents {
         var that = this;
         // this._config.loaded.then((data) => {
            gapiutils.config(this._config);
-           gapiutils.gapi_ready.then(driveutils.set_user_info);
+           gapiutils.gapi_ready.then(driveutils.setUserInfo);
         // })
 
     }
@@ -244,7 +244,7 @@ export class GoogleDriveContents implements IContents {
             $.proxy(driveutils.getResourceForPath, this, path, driveutils.FileType.FILE));
         var contents_prm = metadata_prm.then(function(resource) {
             that._observe_file_resource(resource);
-            return driveutils.get_contents(resource, false);
+            return driveutils.getContents(resource, false);
         });
 
         return Promise.all([metadata_prm, contents_prm]).then(function(values) {

@@ -262,7 +262,7 @@ export var GET_CONTENTS_EXPONENTIAL_BACKOFF_FACTOR = 2.0;
  *     Should be set when already_picked is true.
  * @return {Promise} A promise fullfilled by file contents.
  */
-export var get_contents = function(resource, already_picked:boolean, opt_num_tries?) {
+export var getContents = function(resource, already_picked:boolean, opt_num_tries?) {
     if (resource['downloadUrl']) {
         return gapiutils.download(resource['downloadUrl']);
     } else if (already_picked) {
@@ -279,7 +279,7 @@ export var get_contents = function(resource, already_picked:boolean, opt_num_tri
             }, delay);
         });
         return delayed_reply.then(function(new_resource) {
-            return get_contents(new_resource, true, opt_num_tries - 1);
+            return getContents(new_resource, true, opt_num_tries - 1);
         });
     } else {
         // If downloadUrl field is missing, this means that we do not have
@@ -289,7 +289,7 @@ export var get_contents = function(resource, already_picked:boolean, opt_num_tri
         // app.
         return pickerutils.pick_file(resource.parents[0]['id'], resource['title'])
             .then(function() {
-              return get_contents(resource, true, GET_CONTENTS_MAX_TRIES);
+              return getContents(resource, true, GET_CONTENTS_MAX_TRIES);
             });
     }
 };
@@ -301,7 +301,7 @@ export var get_contents = function(resource, already_picked:boolean, opt_num_tri
  *
  *
  **/
-export var set_user_info = function(selector:string):Promise<any>{
+export var setUserInfo = function(selector:string):Promise<any>{
     selector = selector || '#header-container';
     var request = gapi.client.drive.about.get()
     return gapiutils.execute(request).then(function(result){
