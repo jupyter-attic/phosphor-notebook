@@ -7,7 +7,7 @@
 declare var console:Console;
 
 export interface Cell {
-    source:any;
+    source:String|String[];
     metadata:Object;
 }
 
@@ -25,7 +25,7 @@ export interface Notebook {
  * the notebook server: creating new notebooks, and converting to/from
  * the on-disk format.
  */
-    
+
 /**
  * Utility method to transform a notebook.
  * @param {Object} notebook JSON representation of a notebook.  Note this
@@ -56,9 +56,9 @@ var transform_notebook = function(notebook:Notebook, transform_fn:(string)=> str
  * @param {String} contents The contents of the file, as a string.
  * @return {Object} a JSON representation of the notebook.
      */
-export var notebook_from_file_contents = function(contents:string):Notebook {
+export var notebookFromFileContents = function(contents:string):Notebook {
     var notebook:Notebook = <Notebook>JSON.parse(contents);
-    // bug in some case notebook where serialized twice.
+    // bug in some case notebook where serialized twice. (only on Google Drive)
     // make sure to re-deserialized, if once parse the notebook is still a
     // string.
     if(typeof(notebook) === "string"){
@@ -68,14 +68,14 @@ export var notebook_from_file_contents = function(contents:string):Notebook {
       notebook = <Notebook>JSON.parse(<any>notebook)
       console.warn("[notebook_model.ts] Double desirializing went ok.")
     }
-    var unsplit_lines = function(multiline_string) {
+    var unsplitLines = function(multiline_string) {
         if (Array.isArray(multiline_string)) {
             return multiline_string.join('');
         } else {
             return multiline_string;
         }
     };
-    transform_notebook(<Notebook>notebook, unsplit_lines);
+    transform_notebook(<Notebook>notebook, unsplitLines);
     notebook.metadata = notebook.metadata || {};
     return notebook;
 }
@@ -85,7 +85,7 @@ export var notebook_from_file_contents = function(contents:string):Notebook {
  * @param {Object} notebook a JSON representation of the notebook.
  * @return {Object} The JSON representation with lines split.
  */
-export var notebook_json_contents_from_notebook = function(notebook:Notebook):Notebook {
+export var notebookJsonContentsFromNotebook = function(notebook:Notebook):Notebook {
 
     if(typeof(notebook) == 'string'){
       var e  = new Error("[notebook_model.ts] `file_contents_from_notebook`'s notebook is a string");
@@ -116,7 +116,7 @@ export var notebook_json_contents_from_notebook = function(notebook:Notebook):No
  * @return {String} The JSON representation with lines split.
  */
 export var file_contents_from_notebook = function(notebook:Notebook):string {
-    return JSON.stringify(notebook_json_contents_from_notebook(notebook));
+    return JSON.stringify(notebookJsonContentsFromNotebook(notebook));
 }
 
 /**
@@ -138,4 +138,3 @@ export var new_notebook = function():Notebook{
         'nbformat_minor': 0
     };
 }
-
