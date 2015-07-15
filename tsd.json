@@ -21,7 +21,8 @@
       "commit": "281db74a55053efb4084f96021be65eafd96029f"
     },
     "requirejs/require.d.ts": {
-      "commit": "7c374bf1e59ce14e9e28207e2ba2ab202ba55350",
+      "commit": "7c374bf1e59ce14e9e28207e2ba2ab202ba55350"
+    },
     "jquery/jquery.d.ts": {
       "commit": "6f04d25ad38982d372cc3cda62fa4c0eef9e24d7"
     }
