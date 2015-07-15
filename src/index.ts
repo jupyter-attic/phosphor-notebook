@@ -5,14 +5,6 @@ import demo = require("./demodata")
 import mathjaxutils = require("./mathjaxutils");
 import contents = require("./drivecontents")
 
-interface Mwin extends Window {
-  demo:any;
-  rerender:any;
-  content:any;
-  contents:any;
-
-}
-
 export function main(): void {
     //    var notebook = new NotebookApp.NotebookApplication;
     // notebook.run();
