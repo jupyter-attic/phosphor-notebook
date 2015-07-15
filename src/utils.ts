@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import moment = require('moment');
-declare var  $
+declare var $
 
 export interface MyError extends Error {
     xhr?
@@ -12,7 +12,7 @@ export interface MyError extends Error {
 
 export var XHR_ERROR = 'XhrError';
 
-export var ajax_error_msg = function (jqXHR) {
+export var ajaxErrorMessage = function (jqXHR) {
     /**
      * Return a JSON error message if there is one,
      * otherwise the basic HTTP status text.
@@ -26,8 +26,8 @@ export var ajax_error_msg = function (jqXHR) {
     }
 };
 
-export var wrap_ajax_error = function (jqXHR, status, error) {
-    var wrapped_error = <MyError>(new Error(ajax_error_msg(jqXHR)));
+export var wrapAjaxError = function (jqXHR, status, error) {
+    var wrapped_error = <MyError>(new Error(ajaxErrorMessage(jqXHR)));
     wrapped_error.name =  XHR_ERROR;
     // provide xhr response
     wrapped_error.xhr = jqXHR;
@@ -36,17 +36,17 @@ export var wrap_ajax_error = function (jqXHR, status, error) {
     return wrapped_error;
 };
 
-export var log_ajax_error = function(jqXHR, status, error) {
+export var logAjaxError = function(jqXHR, status, error) {
     /**
      * log ajax failures with informative messages
      */
     var msg = "API request failed (" + jqXHR.status + "): ";
     console.log(jqXHR);
-    msg += ajax_error_msg(jqXHR);
+    msg += ajaxErrorMessage(jqXHR);
     console.log(msg);
 }
 
-export var promising_ajax = function(url, settings) {
+export var promisingAjax = function(url, settings) {
     /**
      * Like $.ajax, but returning an ES6 promise. success and error settings
      * will be ignored.
@@ -57,8 +57,8 @@ export var promising_ajax = function(url, settings) {
             resolve(data);
         };
         settings.error = function(jqXHR, status, error) {
-            log_ajax_error(jqXHR, status, error);
-            reject(wrap_ajax_error(jqXHR, status, error));
+            logAjaxError(jqXHR, status, error);
+            reject(wrapAjaxError(jqXHR, status, error));
         };
         $.ajax(url, settings);
     });
@@ -216,7 +216,7 @@ interface IAjaxSuccess {
 /**
  * Error handler for AJAX request.
  */
-export 
+export
 interface IAjaxError {
   xhr: XMLHttpRequest;
   statusText: string;

@@ -16,12 +16,14 @@ gulp
 Running
 -------
 
-Run a static webserver in the root directory of the repo and go to `http://localhost:8080`.
+Run a static webserver in the root directory of the repo and go to `http://localhost:8890`.
+
+(Google Drive integration will only work on port 8888 to 8899)
 
 ### Python
 
 ```bash
-python -m SimpleHTTPServer 8080
+python -m SimpleHTTPServer 8890
 ```
 
 ### Node

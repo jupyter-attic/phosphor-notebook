@@ -61,7 +61,7 @@ export function rerender(data?): void {
 
     Notebook.prototype._session_start_failed = function(jqxhr, status, error){
         this._session_starting = false;
-        utils.log_ajax_error(jqxhr, status, error);
+        utils.logAjaxError(jqxhr, status, error);
     };
 
 

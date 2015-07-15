@@ -73,7 +73,7 @@ export var download = function(url:string):Promise<any> {
     // Sends request to load file to drive.
     var token = gapi.auth.getToken().access_token;
     var settings = { headers: { 'Authorization': 'Bearer ' + token } };
-    return utils.promising_ajax(url, settings);
+    return utils.promisingAjax(url, settings);
 };
 
 /**
@@ -161,7 +161,7 @@ var load_gapi_1 = function():Promise<any> {
     .then(function() {
         // poll every 100ms until window.gapi and gapi.client exist.
         return poll(function() { return !!(window.gapi && gapi.client); }, 100);
-    }, utils.wrap_ajax_error);
+    }, utils.wrapAjaxError);
 };
 
 /**
