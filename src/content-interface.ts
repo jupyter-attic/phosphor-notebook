@@ -3,9 +3,6 @@
  * Interface that a content manager should implement
  **/
 export interface IContents {
-    /**
-     * get a something by path
-     **/
     get(path:Path, type, options):any
     new_untitled(path:Path, options)
     delete(path:Path)
