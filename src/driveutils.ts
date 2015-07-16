@@ -203,7 +203,7 @@ export var getNewFileName = function(opt_folderId, ext, base_name) {
  * @return {Promise} A promise resolved with the Google Drive Files
  *     resource for the uploaded file, or rejected with an Error object.
  */
-export var uploadToDrive = function(data, metadata, opt_fileId?, opt_params?: any) {
+export var uploadToDrive = function(data:String, metadata:Object, opt_fileId?:String, opt_params?: Object) {
     var params:Object = opt_params || {};
     var delimiter = '\r\n--' + MULTIPART_BOUNDARY + '\r\n';
     var close_delim = '\r\n--' + MULTIPART_BOUNDARY + '--';

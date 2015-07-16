@@ -86,7 +86,7 @@ var files_resource_to_contents_model = function(path:Path, resource:any, content
     // Determine resource type.
     var nbextension = '.ipynb';
     var type = 'file';
-    var model_content;
+    var model_content:any;
     if (mimetype === driveutils.FOLDER_MIME_TYPE) {
         type = 'directory';
     } else if (mimetype === driveutils.NOTEBOOK_MIMETYPE ||
@@ -140,7 +140,8 @@ export class GoogleDriveContents implements IContents {
      *      Dictionary of keyword arguments.
      *          base_url: string
      **/
-    constructor(options) {
+    constructor(options:{base_url?:string
+                        common_config?:any}) {
         this._base_url = options.base_url;
         this._config  = options.common_config;
         /**
@@ -170,7 +171,7 @@ export class GoogleDriveContents implements IContents {
      *
      * @param {resource} resource_prm a Google Drive file resource.
      */
-    private _observe_file_resource(resource) {
+    private _observe_file_resource(resource:any) {
         this._last_observed_revision[resource['id']] = resource['headRevisionId'];
     }
 
@@ -182,7 +183,7 @@ export class GoogleDriveContents implements IContents {
      * @param {Object} model The IPython model object to be saved
      * @return {Promise} A promise fullfilled with the resource of the saved file.
      */
-    private _save_existing(resource, model) {
+    private _save_existing(resource:Object, model:Object) {
         var that = this;
         if(typeof(model) == 'string'){
           var e  = new Error("[drive-contents.ts] `_save_existing`'s model is a string");
@@ -191,7 +192,7 @@ export class GoogleDriveContents implements IContents {
         }
         var converted = contentsModelToMetadataAndBytes(model);
         var contents = converted[1];
-        var save = function() {
+        var save = function():any {
             return driveutils.uploadToDrive(contents, undefined, resource['id']);
         };
         if (resource['headRevisionId'] !=
@@ -214,9 +215,7 @@ export class GoogleDriveContents implements IContents {
      * @param {Object} model The IPython model object to be saved
      * @return {Promise} A promise fullfilled with the resource of the saved file.
      */
-    private _upload_new(folder_id, model) {
-        var that = this;
-
+    private _upload_new(folder_id:String, model:Object) {
         if(typeof(model) == 'string'){
           var e  = new Error("[drive-contents.ts] `_save_existing`'s model is a string");
           console.error(e);
@@ -241,7 +240,7 @@ export class GoogleDriveContents implements IContents {
         var that = this;
         var metadata_prm = gapiutils.gapi_ready.then(
             driveutils.getResourceForPath.bind(this, path, iface.FileType.FILE));
-        var contents_prm = metadata_prm.then(function(resource) {
+        var contents_prm = metadata_prm.then(function(resource:any) {
             that._observe_file_resource(resource);
             return driveutils.getContents(resource, false);
         });
@@ -263,11 +262,12 @@ export class GoogleDriveContents implements IContents {
      *      ext: file extension to use
      *      type: model type to create ('notebook', 'file', or 'directory')
      */
-    new_untitled(path:Path, options):any {
+    new_untitled(path:Path, options:{type?:String
+                                      ext?:String}):any {
         // Construct all data needed to upload file
         var default_ext = '';
         var base_name = '';
-        var model = null;
+        var model:any = null;
         if (options['type'] === 'notebook') {
             default_ext = '.ipynb';
             base_name = 'Untitled'
@@ -299,7 +299,7 @@ export class GoogleDriveContents implements IContents {
 
         var folder_id_prm = gapiutils.gapi_ready
             .then(driveutils.getIdForPath.bind(this, path, iface.FileType.FOLDER))
-        var filename_prm = folder_id_prm.then(function(resource){
+        var filename_prm = folder_id_prm.then(function(resource:Object){
             return driveutils.getNewFileName(resource, options['ext'] || default_ext, base_name);
         });
         return Promise.all([folder_id_prm, filename_prm]).then((values) => {
@@ -319,7 +319,7 @@ export class GoogleDriveContents implements IContents {
         .then(function() {
             return driveutils.getIdForPath(path, iface.FileType.FILE);
         })
-        .then(function(file_id){
+        .then(function(file_id:String){
             return gapiutils.execute(gapi.client.drive.files.delete({'fileId': file_id}));
         });
     }
@@ -331,7 +331,7 @@ export class GoogleDriveContents implements IContents {
         var path_components = driveutils.splitPath(path);
         var new_path_components = driveutils.splitPath(new_path);
 
-        var base_path = [];
+        var base_path:String[] = [];
         var name:Path;
         var new_name:Path;
         if (path_components.length != new_path_components.length) {
@@ -355,7 +355,7 @@ export class GoogleDriveContents implements IContents {
         .then(function() {
             return driveutils.getIdForPath(path)
         })
-        .then(function(file_id) {
+        .then(function(file_id:String) {
             var body = {'title': new_name};
             var request = gapi.client.drive.files.patch({
                 'fileId': file_id,
@@ -363,7 +363,7 @@ export class GoogleDriveContents implements IContents {
             });
             return gapiutils.execute(request);
         })
-        .then(function(resource) {
+        .then(function(resource:any) {
             that._observe_file_resource(resource);
             return files_resource_to_contents_model(new_path, resource);
         });
@@ -374,17 +374,17 @@ export class GoogleDriveContents implements IContents {
      * If the resource has been modifeied on Drive in the
      * meantime, prompt user for overwrite.
      **/
-    save(path:Path, model, options?:any) {
+    save(path:Path, model:any, options?:any) {
         var that = this;
         var path_and_filename = <Path[]>utils.urlPathSplit(<string>path);
         var path = path_and_filename[0];
         var filename = path_and_filename[1];
         return driveutils.getResourceForPath(<string>path, iface.FileType.FOLDER)
-        .then(function(folder_resource) {
+        .then(function(folder_resource:any) {
             return driveutils.getResourceForRelativePath(filename, iface.FileType.FILE, false, folder_resource['id'])
-            .then(function(file_resource) {
+            .then(function(file_resource:any) {
                 return that._save_existing(file_resource, model)
-            }, function(error) {
+            }, function(error:Error) {
                 // If the file does not exist (but the directory does) then a
                 // new file must be uploaded.
                 if (error.name !== 'NotFoundError') {
@@ -394,14 +394,14 @@ export class GoogleDriveContents implements IContents {
                 return that._upload_new(folder_resource['id'], model)
             });
         })
-        .then(function(file_resource) {
+        .then(function(file_resource:any) {
             that._observe_file_resource(file_resource);
             return files_resource_to_contents_model(path, file_resource);
         });
     }
 
 
-    copy(path:Path, model) {
+    copy(path:Path, model:any) {
         return Promise.reject(new Error('Copy not implemented yet.'));
     }
 
@@ -415,7 +415,7 @@ export class GoogleDriveContents implements IContents {
         var that = this;
         return gapiutils.gapi_ready
         .then(driveutils.getIdForPath.bind(this, path, iface.FileType.FILE))
-        .then(function(file_id) {
+        .then(function(file_id:string) {
             var revision_id = that._last_observed_revision[file_id];
             if (!revision_id) {
                 return Promise.reject(new Error('File must be saved before checkpointing'));
@@ -428,27 +428,27 @@ export class GoogleDriveContents implements IContents {
             });
             return gapiutils.execute(request);
         })
-        .then(function(item) {
+        .then(function(item:{id:any; modifiedDate:String}) {
             return {
                 last_modified: item['modifiedDate'],
-                id: item['id'],
+                id: item.id,
                 drive_resource: item
             };
         });
     }
 
-    restore_checkpoint(path:Path, checkpoint_id:CheckpointId, options) {
+    restore_checkpoint(path:Path, checkpoint_id:CheckpointId, options:Object) {
         var file_id_prm = gapiutils.gapi_ready
         .then(driveutils.getIdForPath.bind(this, path, iface.FileType.FILE))
 
-        var contents_prm = file_id_prm.then(function(file_id) {
+        var contents_prm = file_id_prm.then(function(file_id:String) {
             var request = gapi.client.drive.revisions.get({
                 'fileId': file_id,
                 'revisionId': checkpoint_id
             });
             return gapiutils.execute(request);
         })
-        .then(function(response) {
+        .then(function(response:any) {
             return gapiutils.download(response['downloadUrl']);
         })
 
@@ -463,17 +463,17 @@ export class GoogleDriveContents implements IContents {
     list_checkpoints(path:Path, options:any) {
         return gapiutils.gapi_ready
         .then(driveutils.getIdForPath.bind( this, path, iface.FileType.FILE))
-        .then(function(file_id) {
+        .then(function(file_id:String) {
             var request = gapi.client.drive.revisions.list({'fileId': file_id });
             return gapiutils.execute(request);
         })
-        .then(function(response) {
-            return response['items']
-            .filter(function(item) { return item['pinned']; })
-            .map(function(item) {
+        .then(function(response:{item:any}):Promise<any> {
+            return response.item
+            .filter(function(item:any) { return item['pinned']; })
+            .map(function(item:{modifiedDate:String; id:String; drive_resource:any}) {
                 return {
-                    last_modified: item['modifiedDate'],
-                    id: item['id'],
+                    last_modified: item.modifiedDate,
+                    id: item.id,
                     drive_resource: item
                 };
             });
@@ -501,11 +501,11 @@ export class GoogleDriveContents implements IContents {
      *     success: success callback
      *     error: error callback
      */
-    list_contents(path:Path, options):Promise<any>{
+    list_contents(path:Path, options:Object):Promise<any>{
         var that = this;
         return gapiutils.gapi_ready
         .then(driveutils.getIdForPath.bind(this, path, iface.FileType.FOLDER))
-        .then(function(folder_id) {
+        .then(function(folder_id:String) {
             // Gets contents of the folder 1000 items at a time.  Google Drive
             // returns at most 1000 items in each call to drive.files.list.
             // Therefore we need to make multiple calls, using the following
@@ -514,7 +514,7 @@ export class GoogleDriveContents implements IContents {
             // Returns all items starting from the specified page token
             // (or from the start if no page token is specified), and
             // combines these with the items given.
-            var get_items = function(items, page_token?) {
+            var get_items = function(items:String[], page_token?:String) {
                 var query = ('\'' + folder_id + '\' in parents'
                              + ' and trashed = false');
                 var params = {
@@ -526,7 +526,7 @@ export class GoogleDriveContents implements IContents {
                 };
                 var request = gapi.client.drive.files.list(params)
                 return gapiutils.execute(request)
-                .then(function(response) {
+                .then(function(response:any) {
                     var combined_items = items.concat(response['items']);
                     var next_page_token = response['nextPageToken'];
                     if (next_page_token) {
