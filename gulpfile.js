@@ -26,7 +26,13 @@ var tsSources = [
     "kernel",
     "session",
     "utils",
-    "serialize"
+    "serialize",
+    "driveutils",
+    "gapiutils",
+    "drivecontents",
+    "pickerutils",
+    "content_interface",
+    "notebook_model"
 ].map(function(name) {return "./src/" + name + ".ts"; });
 
 
