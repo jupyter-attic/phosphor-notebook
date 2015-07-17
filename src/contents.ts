@@ -13,6 +13,7 @@ var SERVICE_CONTENTS_URL = 'api/contents';
 /**
  * Options for a contents object.
  */
+export
 interface IContentsOpts {
   type?: string;
   format?: string;
