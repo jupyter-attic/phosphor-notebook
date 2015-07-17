@@ -5,10 +5,14 @@ import serialize = require('./serialize');
 import utils = require('./utils');
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 import ISignal = phosphor.core.ISignal;
 =======
 import Signal = phosphor.core.ISignal;
 >>>>>>> Use new phosphor signals
+=======
+import ISignal = phosphor.core.ISignal;
+>>>>>>> Update bower and fix import
 import signal = phosphor.core.signal;
 import IDisposable = phosphor.utility.IDisposable;
 import Disposable = phosphor.utility.Disposable;
