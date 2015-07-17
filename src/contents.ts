@@ -4,6 +4,15 @@
 import utils = require('./utils');
 
 
+/**
+ * The url for the contents service.
+ */
+var SERVICE_CONTENTS_URL = 'api/contents';
+
+
+/**
+ * Options for a contents object.
+ */
 export 
 interface IContentsOpts {
   type?: string;
@@ -23,7 +32,7 @@ class Contents {
    * Create a new contents object.
    */
   constructor(baseUrl: string) {
-    this._baseUrl = baseUrl;
+    this._apiUrl = utils.urlJoinEncode(baseUrl, SERVICE_CONTENTS_URL);
   }
 
   /**
@@ -35,7 +44,7 @@ class Contents {
       method : "GET",
       dataType : "json",
     };
-    var url = this.apiUrl(path);
+    var url = this._getUrl(path);
     var params: IContentsOpts = {};
     if (options.type) { params.type = options.type; }
     if (options.format) { params.format = options.format; }
@@ -57,7 +66,7 @@ class Contents {
       contentType: 'application/json',
       dataType : "json",
     };
-    return utils.ajaxRequest(this.apiUrl(path), settings);
+    return utils.ajaxRequest(this._getUrl(path), settings);
   }
 
   /**
@@ -68,7 +77,7 @@ class Contents {
       method : "DELETE",
       dataType : "json",
     };
-    var url = this.apiUrl(path);
+    var url = this._getUrl(path);
     return utils.ajaxRequest(url, settings).catch(
       // Translate certain errors to more specific ones.
       function(error) {
@@ -93,7 +102,7 @@ class Contents {
       dataType: "json",
       contentType: 'application/json',
     };
-    var url = this.apiUrl(path);
+    var url = this._getUrl(path);
     return utils.ajaxRequest(url, settings);
   }
 
@@ -107,7 +116,7 @@ class Contents {
       data : JSON.stringify(model),
       contentType: 'application/json',
     };
-    var url = this.apiUrl(path);
+    var url = this._getUrl(path);
     return utils.ajaxRequest(url, settings);
   }
   
@@ -122,7 +131,7 @@ class Contents {
       contentType: 'application/json',
       dataType : "json",
     };
-    var url = this.apiUrl(to_dir);
+    var url = this._getUrl(to_dir);
     return utils.ajaxRequest(url, settings);
   }
 
@@ -134,7 +143,7 @@ class Contents {
       method : "POST",
       dataType : "json",
     };
-    var url = this.apiUrl(path, 'checkpoints');
+    var url = this._getUrl(path, 'checkpoints');
     return utils.ajaxRequest(url, settings);
   }
 
@@ -146,7 +155,7 @@ class Contents {
       method : "GET",
       dataType: "json",
     };
-    var url = this.apiUrl(path, 'checkpoints');
+    var url = this._getUrl(path, 'checkpoints');
     return utils.ajaxRequest(url, settings);
   }
 
@@ -157,7 +166,7 @@ class Contents {
     var settings = {
       method : "POST",
     };
-    var url = this.apiUrl(path, 'checkpoints', checkpoint_id);
+    var url = this._getUrl(path, 'checkpoints', checkpoint_id);
     return utils.ajaxRequest(url, settings);
   }
 
@@ -168,7 +177,7 @@ class Contents {
     var settings = {
       method : "DELETE",
     };
-    var url = this.apiUrl(path, 'checkpoints', checkpoint_id);
+    var url = this._getUrl(path, 'checkpoints', checkpoint_id);
     return utils.ajaxRequest(url, settings);
   }
 
@@ -182,11 +191,11 @@ class Contents {
   /**
    * Get an REST url for this file given a path.
    */
-  private apiUrl(...args: string[]): string {
-    var url_parts = [this._baseUrl, 'api/contents'].concat(
+  private _getUrl(...args: string[]): string {
+    var url_parts = [this._apiUrl].concat(
                 Array.prototype.slice.apply(args));
     return utils.urlJoinEncode.apply(null, url_parts);
   }
 
-  private _baseUrl = "unknown";
+  private _apiUrl = "unknown";
 }
