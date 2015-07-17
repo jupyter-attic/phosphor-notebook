@@ -4,7 +4,11 @@
 import serialize = require('./serialize');
 import utils = require('./utils');
 
+<<<<<<< HEAD
 import ISignal = phosphor.core.ISignal;
+=======
+import Signal = phosphor.core.ISignal;
+>>>>>>> Use new phosphor signals
 import signal = phosphor.core.signal;
 import IDisposable = phosphor.utility.IDisposable;
 import Disposable = phosphor.utility.Disposable;
