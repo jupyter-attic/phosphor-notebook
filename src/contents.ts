@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import utils = require('./utils');
-
+import Token = phosphor.di.Token;
 
 /**
  * The url for the contents service.
@@ -21,12 +21,31 @@ interface IContentsOpts {
   ext?: string;
 }
 
+
+/**
+ * Interface that a content manager should implement.
+ **/
+export 
+interface IContents {
+  get(path: string, type: string, options: IContentsOpts): Promise<any>;
+  newUntitled(path: string, options: IContentsOpts): Promise<any>;
+  delete(path: string): void;
+  rename(path: string, newPath: string): Promise<any>;
+  save(path: string, model: any): Promise<any>;
+  listContents(path: string): Promise<any>;
+  copy(path: string, toDir: string): Promise<any>;
+  createCheckpoint(path: string): Promise<any>;
+  restoreCheckpoint(path: string, checkpointID: string): Promise<any>;
+  listCheckpoints(path: string): Promise<any>;
+}
+
+
 /**
  * A contents handle passing file operations to the back-end.  
  * This includes checkpointing with the normal file operations.
  */
 export 
-class Contents {
+class Contents implements IContents {
 
   /**
    * Create a new contents object.
@@ -94,8 +113,8 @@ class Contents {
   /**
    * Rename a file.
    */
-  rename(path: string, new_path: string): Promise<any> {
-    var data = {path: new_path};
+  rename(path: string, newPath: string): Promise<any> {
+    var data = {path: newPath};
     var settings = {
       method : "PATCH",
       data : JSON.stringify(data),
@@ -124,14 +143,14 @@ class Contents {
    * Copy a file into a given directory via POST
    * The server will select the name of the copied file.
    */
-  copy(from_file: string, to_dir: string): Promise<any> {
+  copy(fromFile: string, toDir: string): Promise<any> {
     var settings = {
       method: "POST",
-      data: JSON.stringify({copy_from: from_file}),
+      data: JSON.stringify({copy_from: fromFile}),
       contentType: 'application/json',
       dataType : "json",
     };
-    var url = this._getUrl(to_dir);
+    var url = this._getUrl(toDir);
     return utils.ajaxRequest(url, settings);
   }
 
@@ -162,22 +181,22 @@ class Contents {
   /**
    * Restore a file to a known checkpoint state.
    */
-  restoreCheckpoint(path: string, checkpoint_id: string): Promise<any> {
+  restoreCheckpoint(path: string, checkpointID: string): Promise<any> {
     var settings = {
       method : "POST",
     };
-    var url = this._getUrl(path, 'checkpoints', checkpoint_id);
+    var url = this._getUrl(path, 'checkpoints', checkpointID);
     return utils.ajaxRequest(url, settings);
   }
 
   /**
    * Delete a checkpoint for a file.
    */
-  deleteCheckpoint(path: string, checkpoint_id: string): Promise<any> {
+  deleteCheckpoint(path: string, checkpointID: string): Promise<any> {
     var settings = {
       method : "DELETE",
     };
-    var url = this._getUrl(path, 'checkpoints', checkpoint_id);
+    var url = this._getUrl(path, 'checkpoints', checkpointID);
     return utils.ajaxRequest(url, settings);
   }
 
@@ -199,3 +218,10 @@ class Contents {
 
   private _apiUrl = "unknown";
 }
+
+
+/**
+ * The interface token for IContents.
+ */
+export
+var IContents = new Token<IContents>('IContents');
