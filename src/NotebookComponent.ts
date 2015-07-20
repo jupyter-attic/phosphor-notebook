@@ -29,7 +29,7 @@ var img = DOM.img;
 
 class MimeBundleComponent extends Component<nbformat.MimeBundle> {
   render() {
-    // possible optimization: iterate through 
+    // possible optimization: iterate through
     var x: string | string[];
     if (x = this.data["image/png"]) {
       return img({src:"data:image/png;base64,"+x})
@@ -128,7 +128,7 @@ class MarkdownCellComponent extends BaseComponent<nbformat.MarkdownCell> {
 export var MarkdownCell = createFactory(MarkdownCellComponent)
 
 
-/**   
+/**
  * We inherit from BaseComponent so that we can explicitly control the rendering.  We want to use the virtual dom to render
  * the output, but we want to explicitly manage the code editor.
 */
@@ -143,7 +143,7 @@ class CodeCellComponent extends BaseComponent<nbformat.CodeCell> {
     this.node.appendChild(this.output_node);
 
     this._editor  = CodeMirror(this.editor_node, {
-      mode: 'python', 
+      mode: 'python',
       value: this.data.source,
       lineNumbers: true})
   }
@@ -164,17 +164,17 @@ class CodeCellComponent extends BaseComponent<nbformat.CodeCell> {
     for(var i = 0; i < outputs.length; i++) {
       var x = outputs[i];
       switch(x.output_type) {
-        case "execute_result": 
-          r.push(ExecuteResult(<nbformat.ExecuteResult>x)); 
+        case "execute_result":
+          r.push(ExecuteResult(<nbformat.ExecuteResult>x));
           break;
-        case "display_data": 
-          r.push(DisplayData(<nbformat.DisplayData>x)); 
+        case "display_data":
+          r.push(DisplayData(<nbformat.DisplayData>x));
           break;
-        case "stream": 
-          r.push(Stream(<nbformat.Stream>x)); 
+        case "stream":
+          r.push(Stream(<nbformat.Stream>x));
           break;
-        case "error": 
-          r.push(JupyterError(<nbformat.JupyterError>x)); 
+        case "error":
+          r.push(JupyterError(<nbformat.JupyterError>x));
           break;
       }
     }
@@ -191,8 +191,8 @@ class NotebookComponent extends Component<nbformat.Notebook> {
   render() {
     var cells = this.data.cells;
     var r: Elem[] = [];
-    for(var i = 0; i < cells.length; i++) {
-      var c = cells[i];
+    for(var i = 0; i < cells.count; i++) {
+      var c = cells.get(i);
       switch(c.cell_type) {
         case "code":
           r.push(CodeCell(<nbformat.CodeCell>c));
