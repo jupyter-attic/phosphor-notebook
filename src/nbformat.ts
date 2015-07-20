@@ -15,6 +15,45 @@ interface MimeBundle {
 }
 
 export
+interface IList<T> {
+  count:number;
+  get(index:number):T
+  set(index:number, value:T):void
+  insert(index:number, value:T):void
+  push(value:T):void
+}
+
+export
+type ICellList = IList<Cell>
+
+export class BasicList<T> implements IList<T> {
+  private _list:T[]
+  constructor(list:T[]){
+    this._list = list;
+  }
+
+  get(index:number){
+    return this._list[index]
+  }
+
+  get count(){
+    return this._list.length
+  }
+
+  set(index:number, value:T){
+    this._list[index] = value
+  }
+
+  insert(index:number, value:T){
+    this._list.splice(index, 0,  value)
+  }
+
+  push(value:T){
+    this._list.push(value)
+  }
+}
+
+export
 interface ExecuteResult {
     output_type: string; // "execute_result"
     execution_count: number;
@@ -48,7 +87,7 @@ export
 type Output = ExecuteResult | DisplayData | Stream | JupyterError;
 
 export
-type Cell = BaseCell | RawCell | MarkdownCell | CodeCell;
+type Cell =  RawCell | MarkdownCell | CodeCell;
 
 export
 interface BaseCell {
@@ -104,7 +143,7 @@ interface Notebook {
     }
     nbformat_minor: number;
     nbformat: number;
-    cells: Cell[];
+    cells: ICellList;
 }
 
 export
