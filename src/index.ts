@@ -3,14 +3,29 @@ import NotebookComponent = require("./NotebookComponent");
 import render = phosphor.virtualdom.render;
 import demo = require("./demodata")
 import mathjaxutils = require("./mathjaxutils");
+import contents = require("./drivecontents")
+
 export function main(): void {
     //    var notebook = new NotebookApp.NotebookApplication;
     // notebook.run();
-    var test = document.getElementById('nb');
+
     mathjaxutils.init();
-    render(NotebookComponent.Notebook(demo.notebook), test);
+    rerender();
+    var ct = new contents.GoogleDriveContents({
+      base_url:'',
+      common_config:{}
+    })
+    ct.get('AAAAA.ipynb',{}).then(function(data){
+      console.info('[index.ts] Will rerender with new Drive content')
+      rerender(data.content)
+    })
 };
 
+export function rerender(data?): void {
+  var test = document.getElementById('nb');
+  var notebook = data || demo.notebook;
+  render(NotebookComponent.Notebook(notebook), test);
+}
 
 /*
 
@@ -31,7 +46,7 @@ export function main(): void {
 
     Notebook.prototype._session_start_failed = function(jqxhr, status, error){
         this._session_starting = false;
-        utils.log_ajax_error(jqxhr, status, error);
+        utils.logAjaxError(jqxhr, status, error);
     };
 
 
@@ -40,4 +55,3 @@ cells can call with their ids and the text in the cell.  Or maybe the cell shoul
 and then execute it.
 
    */
-
