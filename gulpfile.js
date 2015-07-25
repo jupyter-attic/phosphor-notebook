@@ -34,7 +34,9 @@ var tsSources = [
     "pickerutils",
     "content_interface",
     "notebook_model",
-    "rtmodel"
+    "rtmodel",
+    "gmodel",
+    "mockrtmodel",
 ].map(function(name) {return "./src/" + name + ".ts"; });
 
 
