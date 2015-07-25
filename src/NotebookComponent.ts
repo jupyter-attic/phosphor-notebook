@@ -12,10 +12,8 @@ For executing, need:
 
 */
 
-declare var gapi;
 
-import {INotebookRTModel} from "./rtmodel";
-
+import {INotebookRTModel, IRTString, IRTStringEvent} from "./rtmodel"
 
 import rtmodel = require("./rtmodel");
 import mathjaxutils = require("./mathjaxutils");
@@ -170,7 +168,7 @@ class MarkdownCellComponent extends BaseComponent<rtmodel.IRTMarkdownCell> {
   onUpdateRequest(msg: IMessage): void {
     // replace the innerHTML of the node with the rendered markdown
     //var t = mathjaxutils.remove_math(this.data.source);
-    var t = mathjaxutils.remove_math('foobar');
+    var t = mathjaxutils.remove_math(this.data.source.value);
     marked(t.html, { sanitize: true, renderer: renderer}, (err: any, html: string) => {
         this.node.innerHTML = mathjaxutils.replace_math(html, t.math);
         // TODO: do some serious sanitization, using, for example, the caja sanitizer
@@ -320,88 +318,10 @@ class CodeCellComponent extends BaseComponent<rtmodel.IRTCodeCell> {
 export var CodeCell = createFactory(CodeCellComponent);
 
 
-import {IRTString} from "./rtmodel"
-import {IRTStringEvent} from "./rtmodel"
 
+import {GDriveRTStringEvent, GDriveRTString} from "./gmodel"
+import {MockRTString} from "./mockrtmodel"
 
-
-export class RTStringEvent implements IRTStringEvent {
-  index:number
-  text:string
-  constructor(evt:any){
-    this.index = evt.index
-    this.text = evt.text
-  }
-}
-
-/**
- * Wrapper around the cells' sources, that expose potentially
- * collaborative methods.
- **/
-export class RTString implements IRTString{
-  
-  _origin:any
-  constructor(origin:any){
-    this._origin = origin
-  }
-  
-  get value():string{
-    if(this.collaborative){
-      return this._origin.getText()
-    } else {
-      return this._origin
-    }
-  }
-  
-  set value(newValue:string){
-    if(this.collaborative){
-      this._origin.setText(newValue);
-    } else {
-      this._origin = newValue;
-    }
-  }
-  
-  get collaborative():boolean{
-    return (this._origin.addEventListener !== undefined)
-  }
-  
-  oninsert(callback:(evt:IRTStringEvent)=>void, onlocal=false):void{
-    if(this.collaborative){
-      this._origin.addEventListener(gapi.drive.realtime.EventType.TEXT_INSERTED,
-        (event) => {
-          if(event.isLocal !== true){
-            callback(new RTStringEvent(event))
-          }
-        }
-      )
-    }
-  }
-  
-  ondelete(callback:(evt)=>void, onlocal=false):void{
-    if(this.collaborative){
-      this._origin.addEventListener(gapi.drive.realtime.EventType.TEXT_DELETED,
-        (event) => {
-          if(event.isLocal !== true){
-            callback(new RTStringEvent(event))
-          }
-        }
-      )
-    }
-  }
-  
-  insert(index:number, text:string):void{
-    if(this.collaborative){
-      this._origin.insertString(index, text)
-    }
-  }
-  
-  deleteRange(from:number, to:number):void{
-    if(this.collaborative){
-        this._origin.removeRange(from, to)
-    }
-  }
-  
-}
 
 class CellAcessor implements rtmodel.IRTBaseCell{
   _thing;
@@ -419,9 +339,9 @@ class CellAcessor implements rtmodel.IRTBaseCell{
   
   get source():any{
     if (this._thing.get !== undefined){
-      return new RTString(this._thing.get('source'))
+      return new GDriveRTString(this._thing.get('source'))
     } else {
-      return new RTString(this._thing.source || 'default source')
+      return new GDriveRTString(this._thing.source || 'default source')
     }
   }
   
