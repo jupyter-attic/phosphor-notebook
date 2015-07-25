@@ -182,8 +182,6 @@ export var MarkdownCell = createFactory(MarkdownCellComponent)
  * factory for codemirror's callback on add and on delete
  * that shoudl be triggers by the model.
  **/
- // TODO, the event is still a GoogleRT event.
- // wrap it in our own implementation.
 var on_add = function(cm){
     return function(evts:IRTStringEvent):void{
         var str = evts.text;
@@ -197,8 +195,6 @@ var on_add = function(cm){
  * factory for codemirror's callback on add and on delete
  * that shoudl be triggers by the model.
  **/
- // TODO, the event is still a GoogleRT event.
- // wrap it in our own implementation.
 var on_del = function(cm){
     return function(evts:IRTStringEvent):void{
         var from = fromAbsoluteCursorPos(cm, evts.index);
@@ -225,8 +221,8 @@ class CodeCellComponent extends BaseComponent<rtmodel.IRTCodeCell> {
     this._editor  = CodeMirror(this.editor_node, {
       mode: 'python',
       value: source.value,
-      lineNumbers: true});
-    var that = this;
+      lineNumbers: true
+    });
   
     // change tha to changes at some point that are triggerd
     // in batch operation. That shoudl make a difference for
