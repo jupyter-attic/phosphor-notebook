@@ -58,11 +58,14 @@ export class RTList implements nbformat.IList<Cell>{
 }
 
 var rtype = function():string{
-  var i = Math.floor(Math.random()*3);
-  
+  var i = Math.floor(Math.random()*5);
+ 
+  // biase code a bit
   return ["code",
+          "code",
+          "code",
           "markdown",
-          "raw"][i];  
+          "raw"][i];
 }
 
 var rstring =function():string{
@@ -84,15 +87,17 @@ export class RTNotebook implements INotebookInterface {
   constructor(gd:any, model:any){
     this._gd = gd
     this._model = model
-    var ctype = rtype();
-    console.log('creating', ctype)
-    this._gd.get('cells').insert(0, model.createMap({'cell_type':ctype,
-      'source': model.createString(rstring())
-    }))
-    var cells = this._gd.get('cells');
-    for(var i = 30; i < cells.length; i++){
-      cells.remove(i)
-    }
+    /*for(var i=0; i<10; i++){
+      var ctype = rtype();
+      console.log('creating', ctype)
+      this._gd.get('cells').insert(0, model.createMap({'cell_type':ctype,
+        'source': model.createString(rstring())
+      }))
+    }*/
+    // var cells = this._gd.get('cells');
+    // for(var i = 0; i < cells.length; i++){
+      // cells.remove(i)
+    // }
   }
 
   get cells(){

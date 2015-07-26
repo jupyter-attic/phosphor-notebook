@@ -23,8 +23,9 @@ export function main(): void {
 
 export function rerender(data?): void {
   var test = document.getElementById('nb');
-  var notebook = data || demo.notebook;
-  render(NotebookComponent.Notebook(notebook), test);
+  if(data){
+    render(NotebookComponent.Notebook(data), test);
+  }
 }
 
 /*

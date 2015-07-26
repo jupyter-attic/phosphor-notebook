@@ -167,12 +167,12 @@ var fromAbsoluteCursorPos = function (cm:any, cursor_pos:number):LC {
 class MarkdownCellComponent extends BaseComponent<rtmodel.IRTMarkdownCell> {
   onUpdateRequest(msg: IMessage): void {
     // replace the innerHTML of the node with the rendered markdown
-    //var t = mathjaxutils.remove_math(this.data.source);
-    var t = mathjaxutils.remove_math(this.data.source.value);
+    var source = this.data.source.value;
+    var t = mathjaxutils.remove_math(source);
     marked(t.html, { sanitize: true, renderer: renderer}, (err: any, html: string) => {
         this.node.innerHTML = mathjaxutils.replace_math(html, t.math);
         // TODO: do some serious sanitization, using, for example, the caja sanitizer
-        MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.node]);
+        // MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.node]);
     });
   }
 }
@@ -184,6 +184,7 @@ export var MarkdownCell = createFactory(MarkdownCellComponent)
  **/
 var on_add = function(cm){
     return function(evts:IRTStringEvent):void{
+        console.log(">>>>>>> this is on")
         var str = evts.text;
         var from = fromAbsoluteCursorPos(cm, evts.index)
         var to = from;
@@ -199,6 +200,7 @@ var on_del = function(cm){
     return function(evts:IRTStringEvent):void{
         var from = fromAbsoluteCursorPos(cm, evts.index);
         var to   = fromAbsoluteCursorPos(cm, evts.index+evts.text.length);
+        console.log("<<<<<<<< receive events", evts, "convert to remove from :" , from, "to ", to )
         cm.getDoc().replaceRange('', from, to, '+remote_sync');
     }
 };
@@ -233,29 +235,30 @@ class CodeCellComponent extends BaseComponent<rtmodel.IRTCodeCell> {
           return
         }
         // TODO need to handle undo/redo
-        if(change.origin === '+input' || change.origin === 'paste' || change.origin === '*compose'){
+        var origin = change.origin;
+        if(origin === '+input' || origin === 'paste' || origin === '*compose' || origin === 'undo' || origin === 'redo'){
             var index = toAbsoluteCursorPosition(cm, change.from)
             // handle insertion of new lines.
             //
-            var text = change.text[0];
-            if(change.text.length >= 2){
-                text = change.text.join('\n');
+            var text = change.text.join('\n');
+            
+            if(change.removed.length !== 0){
+              var endIndex = index + change.removed.join('').length
+              console.log("----- remove from ", index , "to ", endIndex,"with change:", change)
+              endIndex += change.removed.length-1;
+              source.deleteRange(index, endIndex);
             }
-            // if htere is a to != from than we need to trigger a delete. first.
-            var indexto = toAbsoluteCursorPosition(cm, change.to)
-            if(index != indexto){
-              source.deleteRange(index, indexto)
+            console.log("[==]", origin, " is inserting -", text, "- at index ", index )
+            if(text.length > 0){
+              source.insert(index, text)
             }
-            source.insert(index, text)
-          } else if (change.origin == '+delete'){
-              // TODO do not use cm here to calculate new position,
-              // as we are not in beforeChange, use the actual removed text.
-              // this might also be a problem when deleting across lines boundaries.,
-              // as we compute the new thign positon with line n+1
-              // leading to only a new line bbeign deleted on the local codemirro instance.
-              // but the full line beeing destryed on the other side
+          } else if (change.origin === '+delete' || change.origin === 'cut'){
               var startIndex = toAbsoluteCursorPosition(cm, change.from);
-              var endIndex = toAbsoluteCursorPosition(cm, change.to);
+              // do not use toAbsoluteCursor position for end
+              // as the text has already been removed !
+              var endIndex = startIndex + change.removed.join('').length
+              console.log("----- remove from ", startIndex , "to ", endIndex,"with change:", change)
+              endIndex += change.removed.length-1;
               source.deleteRange(startIndex, endIndex);
           } else if (change.origin === '+remote_sync'){
             var len= change.text.reduce(function(s, next) {
@@ -337,7 +340,7 @@ class CellAcessor implements rtmodel.IRTBaseCell{
     if (this._thing.get !== undefined){
       return new GDriveRTString(this._thing.get('source'))
     } else {
-      return new GDriveRTString(this._thing.source || 'default source')
+      return new MockRTString(this._thing.source)
     }
   }
   

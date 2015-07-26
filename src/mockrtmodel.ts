@@ -26,7 +26,7 @@ export class MockRTString implements IRTString {
     var before = value.slice(0, index);
     var after = value.slice(index);
     this.value = before.concat(value, after)
-    this._oninsert({index:index, text:value})
+    //this._oninsert({index:index, text:value})
   }
   
   deleteRange(from:number, to:number):void {
@@ -34,6 +34,6 @@ export class MockRTString implements IRTString {
     var removed = this.value.slice(from, to  )
     var after   = this.value.slice(to)
     this.value = before.concat(after)
-    this._ondelete({index:from, text:removed})
+    //this._ondelete({index:from, text:removed})
   }
 }

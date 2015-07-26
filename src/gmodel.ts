@@ -9,6 +9,7 @@ export class GDriveRTString implements IRTString{
   
   _origin:any
   constructor(origin:any){
+    console.info("[gmodel] Construction with object of type", typeof(origin), origin)
     this._origin = origin
   }
   
@@ -37,6 +38,7 @@ export class GDriveRTString implements IRTString{
       this._origin.addEventListener(gapi.drive.realtime.EventType.TEXT_INSERTED,
         (event) => {
           if(event.isLocal !== true){
+            console.log('>>> and we are NOT LOCAL')
             callback(new GDriveRTStringEvent(event))
           }
         }
@@ -57,13 +59,16 @@ export class GDriveRTString implements IRTString{
   }
   
   insert(index:number, text:string):void{
+    console.log(".......=> we are inserting", this.collaborative)
     if(this.collaborative){
+      console.log("......=>  trigger insert")
       this._origin.insertString(index, text)
     }
   }
   
   deleteRange(from:number, to:number):void{
     if(this.collaborative){
+        console.log("[gmodel] remove range from ", from, "to:", to)
         this._origin.removeRange(from, to)
     }
   }
