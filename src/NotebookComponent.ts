@@ -184,7 +184,6 @@ export var MarkdownCell = createFactory(MarkdownCellComponent)
  **/
 var on_add = function(cm){
     return function(evts:IRTStringEvent):void{
-        console.log(">>>>>>> this is on")
         var str = evts.text;
         var from = fromAbsoluteCursorPos(cm, evts.index)
         var to = from;
@@ -236,7 +235,15 @@ class CodeCellComponent extends BaseComponent<rtmodel.IRTCodeCell> {
         }
         // TODO need to handle undo/redo
         var origin = change.origin;
-        if(origin === '+input' || origin === 'paste' || origin === '*compose' || origin === 'undo' || origin === 'redo'){
+        if(  origin === '+input'
+          || origin === '+delete'
+          || origin === '*compose'
+          || origin === 'paste'
+          || origin === 'undo'
+          || origin === 'redo'
+          || origin === 'cut'
+          || origin === 'drag'
+            ){
             var index = toAbsoluteCursorPosition(cm, change.from)
             // handle insertion of new lines.
             //
@@ -244,26 +251,17 @@ class CodeCellComponent extends BaseComponent<rtmodel.IRTCodeCell> {
             
             if(change.removed.length !== 0){
               var endIndex = index + change.removed.join('').length
-              console.log("----- remove from ", index , "to ", endIndex,"with change:", change)
               endIndex += change.removed.length-1;
               source.deleteRange(index, endIndex);
             }
-            console.log("[==]", origin, " is inserting -", text, "- at index ", index )
             if(text.length > 0){
               source.insert(index, text)
             }
-          } else if (change.origin === '+delete' || change.origin === 'cut'){
-              var startIndex = toAbsoluteCursorPosition(cm, change.from);
-              // do not use toAbsoluteCursor position for end
-              // as the text has already been removed !
-              var endIndex = startIndex + change.removed.join('').length
-              console.log("----- remove from ", startIndex , "to ", endIndex,"with change:", change)
-              endIndex += change.removed.length-1;
-              source.deleteRange(startIndex, endIndex);
           } else if (change.origin === '+remote_sync'){
             var len= change.text.reduce(function(s, next) {
                 return s + next.length;
             }, 0);
+            // from-to is not correct on multiline paste. 
             this._editor.getDoc().markText({line:change.from.line, ch:change.from.ch},
                                            {line:change.to.line, ch:change.to.ch+1+len},
                                            {css:'background-color: #DDF;', title:'Nyan Cat cursor'})

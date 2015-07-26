@@ -9,7 +9,6 @@ export class GDriveRTString implements IRTString{
   
   _origin:any
   constructor(origin:any){
-    console.info("[gmodel] Construction with object of type", typeof(origin), origin)
     this._origin = origin
   }
   
@@ -59,9 +58,7 @@ export class GDriveRTString implements IRTString{
   }
   
   insert(index:number, text:string):void{
-    console.log(".......=> we are inserting", this.collaborative)
     if(this.collaborative){
-      console.log("......=>  trigger insert")
       this._origin.insertString(index, text)
     }
   }
