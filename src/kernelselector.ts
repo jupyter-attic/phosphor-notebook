@@ -61,6 +61,7 @@ class KernelSelector {
       method: "GET",
       dataType: "json"
     }
+    this._kernelspecs = new Map<string, IKernelSpecId>();
     this._loaded = utils.ajaxRequest(url, settings).then(
       (success: utils.IAjaxSuccess) => {
           var err = new Error('Invalid KernelSpec info');
@@ -77,9 +78,10 @@ class KernelSelector {
             throw err;
           }
           for (var i = 0; i < data.kernelspecslength; i++) {
-            validateKernelSpec(data.kernelspecs[i]);
+            var ks = data.kernelspecs[i]
+            validateKernelSpec(ks);
+            this._kernelspecs.set(ks.name, ks);
           }
-          this._kernelspecs = success.data;
       });
   }
 
@@ -92,7 +94,7 @@ class KernelSelector {
     }
     var selected = <IKernelSpecId>kernel;
     return this._loaded.then(function() {
-        return this._kernelspecs[selected.name];
+        return this._kernelspecs.get(selected.name);
     });
   }
 
@@ -106,24 +108,24 @@ class KernelSelector {
       }
       var kernelspecs = this._kernelspecs;
       var available = _sortedNames(kernelspecs);
-      var matches = [];
+      var matches: string[] = [];
       var language = selected.spec.language;
       if (language && language.length > 0) {
         available.map(function(name) {
-          if (kernelspecs[name].spec.language.toLowerCase() === language.toLowerCase()) {
+          if (kernelspecs.get(name).spec.language.toLowerCase() === language.toLowerCase()) {
               matches.push(name);
           }
         });
       }
       if (matches.length === 1) {
-        return kernelspecs[matches[0]];
+        return kernelspecs.get(matches[0]);
       } else {
 
       }
     });
   }
 
-  private _kernelspecs: IKernelSpecId[];
+  private _kernelspecs: Map<string, IKernelSpecId>;
   private _loaded: Promise<void>;
 }
 
@@ -131,11 +133,11 @@ class KernelSelector {
 /**
  * Sort kernel names.
  */
-function _sortedNames(kernelspecs: IKernelSpecId[]) {
+function _sortedNames(kernelspecs: Map<string, IKernelSpecId>) {
   return Object.keys(kernelspecs).sort(function (a, b) {
     // sort by display_name
-    var da = kernelspecs[a].spec.display_name;
-    var db = kernelspecs[b].spec.display_name;
+    var da = kernelspecs.get(a).spec.display_name;
+    var db = kernelspecs.get(b).spec.display_name;
     if (da === db) {
       return 0;
     } else if (da > db) {
