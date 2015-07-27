@@ -37,6 +37,7 @@ interface IKernelSpec {
 /**
  * KernelSpecId interface.
  */
+ export
 interface IKernelSpecId {
   name: string;
   spec: IKernelSpec;
@@ -172,7 +173,7 @@ function validateKernelSpec(info: IKernelSpecId): void {
       typeof spec.codemirror_mode !== 'string') {
     throw err;
   }
-  if (!spec.hasOwnProperty('env') || !spec.hasOwnProperty('help_links') {
+  if (!spec.hasOwnProperty('env') || !spec.hasOwnProperty('help_links')) {
     throw err;
   }
 }

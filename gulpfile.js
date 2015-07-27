@@ -27,7 +27,8 @@ var tsSources = [
     "kernel",
     "session",
     "utils",
-    "serialize"
+    "serialize",
+    "kernelselector"
 ].map(function(name) {return "./src/" + name + ".ts"; });
 
 
