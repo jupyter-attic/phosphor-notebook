@@ -1,4 +1,3 @@
-
 /**
  * Interface that a content manager should implement
  **/

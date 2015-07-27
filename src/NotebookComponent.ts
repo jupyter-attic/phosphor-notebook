@@ -9,9 +9,7 @@ For executing, need:
 * kernel
 * comm
 
-
 */
-
 
 import {INotebookRTModel, IRTString, IRTStringEvent} from "./rtmodel"
 
@@ -74,6 +72,7 @@ class JupyterErrorComponent extends Component<rtmodel.IRTJupyterError> {
 export var JupyterError = createFactory(JupyterErrorComponent)
 
 // customized renderer example from marked.js readme
+// marked does not yet have render on DefinitivelyTyped, PR in progress.
 var renderer = new (<any>marked).Renderer();
 renderer.heading = function (text: string, level: number) {
   var escapedText = text.toLowerCase().replace(/[^\w]+/g, '-');
@@ -119,34 +118,31 @@ renderer.link = function(href: string, title: string, text: string) {
 /**
  * get the absolute cursor position from CodeMirror's col, ch
  */
-var toAbsoluteCursorPosition = function(cm:any, cursor:any):number {
+var toAbsoluteCursorPosition = function(cmdoc:CodeMirror.Doc, cursor:CodeMirror.Position):number {
     var cursor_pos = cursor.ch;
     for (var i = 0; i < cursor.line; i++) {
         try {
-          cursor_pos += cm.getLine(i).length + 1;
+          cursor_pos += cmdoc.getLine(i).length + 1;
         } catch (e){
+          
+          // sometime I do get dropped here.
+          // figure out why. Auto trigger debugger to be able to investigate
+          // imediately once this happend
+          
           debugger;
         }
     }
     return cursor_pos;
 };
 
-export interface LC {
-  line:number
-  ch:number
-}
-export interface FromTo {
-  from:LC
-  to:LC
-}
 
 /**
  * turn absolute cursor position into CodeMirror col, ch cursor
  */
-var fromAbsoluteCursorPos = function (cm:any, cursor_pos:number):LC {
+var fromAbsoluteCursorPos = function (cmdoc:CodeMirror.Doc, cursor_pos:number):CodeMirror.Position {
   var i:number, line, next_line;
   var offset = 0;
-  for (i = 0, next_line=cm.getLine(i); next_line !== undefined; i++, next_line=cm.getLine(i)) {
+  for (i = 0, next_line=cmdoc.getLine(i); next_line !== undefined; i++, next_line=cmdoc.getLine(i)) {
       line = next_line;
       if (offset + next_line.length < cursor_pos) {
           offset += next_line.length + 1;
@@ -244,7 +240,7 @@ class CodeCellComponent extends BaseComponent<rtmodel.IRTCodeCell> {
           || origin === 'cut'
           || origin === 'drag'
             ){
-            var index = toAbsoluteCursorPosition(cm, change.from)
+            var index = toAbsoluteCursorPosition(cm.getDoc(), change.from)
             // handle insertion of new lines.
             //
             var text = change.text.join('\n');
