@@ -10,7 +10,6 @@ import INotebookInterface = nbformat.INotebookInterface;
 import Cell = nbformat.Cell;
 
 import iface = require('./content_interface');
-import Path = iface.Path
 import FileType = iface.FileType
 
 export var FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder';
@@ -168,7 +167,7 @@ export var getResourceForRelativePath = function(path_component:String, type:Fil
 /**
  * Split a path into path components
  */
-export var splitPath = function(path:Path):Path[] {
+export var splitPath = function(path:String):String[] {
     return path.split('/').filter((s,i,a) => (Boolean(s)));
 };
 
@@ -184,7 +183,7 @@ export var splitPath = function(path:Path):Path[] {
  * @return {Promise} fullfilled with file/folder id (string) on success
  *     or Error object on error.
  */
-export var getResourceForPath = function(path:Path, type?) {
+export var getResourceForPath = function(path:String, type?) {
         var components = splitPath(path);
         if (components.length == 0) {
             return gapiutils.execute(gapi.client.drive.about.get())

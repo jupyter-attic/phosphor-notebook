@@ -7,18 +7,17 @@ import notebook_model = require("nbformat")
 import INotebookInterface = notebook_model.INotebookInterface;
 
 export interface IContents {
-    get(path:Path, type:FileType, options:Object):any
-    new_untitled(path:Path, options:Object):INotebookInterface
-    delete(path:Path):void
-    rename(path: Path, new_path: Path):Promise<any>
-    save(path: Path, model: any, options?:any):Promise<any>
-    list_contents(path: Path, options: any):Promise<any>
-    copy(path: Path, model: any):Promise<any>
-    create_checkpoint(path: Path, options: any):any
-    restore_checkpoint(path: Path, checkpoint_id: CheckpointId, options: any):Promise<any>
-    list_checkpoints(path: Path, options: any):any
+    get(path: String, type: FileType, options: Object): any
+    new_untitled(path: String, options: Object): INotebookInterface
+    delete(path: String): void
+    rename(path: String, new_path: String): Promise<any>
+    save(path: String, model: any, options?: any): Promise<any>
+    list_contents(path: String, options: any): Promise<any>
+    copy(path: String, model: any): Promise<any>
+    create_checkpoint(path: String, options: any): any
+    restore_checkpoint(path: String, checkpoint_id: CheckpointId, options: any): Promise<any>
+    list_checkpoints(path: String, options: any): any
 }
 
-export interface CheckpointId extends Object {}
-export interface Path extends String {}
-export enum FileType {FILE=1, FOLDER=2}
+export interface CheckpointId extends Object {    }
+export enum FileType { FILE=1 , FOLDER=2 }

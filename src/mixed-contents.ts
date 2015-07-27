@@ -11,7 +11,6 @@ import Promises = require('es6-promise');
 import iface = require('./content_interface');
 
 import IContents = iface.IContents;
-import Path = iface.Path;
 import CheckpointId = iface.CheckpointId
 
 /** Enum for object types */
@@ -33,7 +32,7 @@ var _default = {"schema":
 };
 
 export interface File {
-    path:Path
+    path:String
 }
 
 export interface FileList {
@@ -117,7 +116,7 @@ export class MixedContents implements IContents {
      * @param {String} path The path to check.
      * @return {String} The root path for the contents instance.
      */
-    get_fs_root(filesystem:FileSystem, path:Path):Path {
+    get_fs_root(filesystem:FileSystem, path:String):String {
         var components = path.split('/');
         if (components.length === 0) {
             return '';
@@ -136,7 +135,7 @@ export class MixedContents implements IContents {
      * @return {String} the converted path
      *
      */
-    from_virtual_path(root:Path, path:Path, config:any):Path {
+    from_virtual_path(root:String, path:String, config:any):String {
         var match_conf = config.filter(function(x){return x.root == root;});
         if( match_conf[0].stripjs !== true){
           return path;
@@ -152,8 +151,8 @@ export class MixedContents implements IContents {
      * @return {String} the converted path
      *
      */
-    private _to_virtual_path(root:Path, path:Path):Path {
-        return <Path>utils.url_path_join(<string>root, <string>path);
+    private _to_virtual_path(root:String, path:String):String {
+        return <String>utils.url_path_join(<string>root, <string>path);
     }
 
     /**
@@ -163,7 +162,7 @@ export class MixedContents implements IContents {
      * @param {File} file The file model (this is modified by the function).
      * @return {File} the converted file model
      */
-    private _to_virtual_file(root:Path, file:File):File {
+    private _to_virtual_file(root:String, file:File):File {
         file['path'] = this._to_virtual_path(root, file['path']);;
         return file;
     }
@@ -175,13 +174,13 @@ export class MixedContents implements IContents {
      * @param {Object} list The file list (this is modified by the function).
      * @return {Object} The converted file list
      */
-    private _to_virtual_list(root:Path, list:FileList):FileList {
+    private _to_virtual_list(root:String, list:FileList):FileList {
         list['content'].forEach($.proxy(this._to_virtual_file, this, root));
         return list;
     }
 
 
-    private _to_virtual(root:Path, type:ArgType, object) {
+    private _to_virtual(root:String, type:ArgType, object) {
         if (type === ArgType.PATH) {
             return this._to_virtual_path(root, object);
         } else if (type === ArgType.FILE) {
@@ -193,7 +192,7 @@ export class MixedContents implements IContents {
         }
     }
 
-    from_virtual(root:Path, type:ArgType, object, config) {
+    from_virtual(root:String, type:ArgType, object, config) {
         if (type === ArgType.PATH) {
             return this.from_virtual_path(root, object, config);
         } else if (type === ArgType.FILE) {
@@ -241,49 +240,49 @@ export class MixedContents implements IContents {
      * File management functions
      */
 
-    get(path:Path, type:ArgType, options:any) {
+    get(path:String, type:ArgType, options:any) {
         return this._route_function(
             'get',
             [ArgType.PATH, ArgType.OTHER, ArgType.OTHER],
             ArgType.FILE, arguments);
     }
 
-    new_untitled(path:Path, options) {
+    new_untitled(path:String, options) {
         return this._route_function(
             'new_untitled',
             [ArgType.PATH, ArgType.OTHER],
             ArgType.FILE, arguments);
     }
 
-    delete(path:Path) {
+    delete(path:String) {
         return this._route_function(
             'delete',
             [ArgType.PATH],
             ArgType.OTHER, arguments);
     }
 
-    rename(path:Path, new_path:Path) {
+    rename(path:String, new_path:String) {
         return this._route_function(
             'rename',
             [ArgType.PATH, ArgType.PATH],
             ArgType.FILE, arguments);
     }
 
-    save(path: Path, model, options) {
+    save(path: String, model, options) {
         return this._route_function(
             'save',
             [ArgType.PATH, ArgType.OTHER, ArgType.OTHER],
             ArgType.FILE, arguments);
     }
 
-    list_contents(path:Path, options) {
+    list_contents(path:String, options) {
         return this._route_function(
             'list_contents',
             [ArgType.PATH, ArgType.OTHER],
             ArgType.LIST, arguments);
     }
 
-    copy(from_file:Path, to_dir:Path) {
+    copy(from_file:String, to_dir:String) {
         return this._route_function(
             'copy',
             [ArgType.PATH, ArgType.PATH],
@@ -294,21 +293,21 @@ export class MixedContents implements IContents {
      * Checkpointing Functions
      */
 
-    create_checkpoint(path:Path, options) {
+    create_checkpoint(path:String, options) {
         return this._route_function(
             'create_checkpoint',
             [ArgType.PATH, ArgType.OTHER],
             ArgType.OTHER, arguments);
     }
 
-    restore_checkpoint(path:Path, checkpoint_id:CheckpointId, options:any) {
+    restore_checkpoint(path:String, checkpoint_id:CheckpointId, options:any) {
         return this._route_function(
             'restore_checkpoint',
             [ArgType.PATH, ArgType.OTHER, ArgType.OTHER],
             ArgType.OTHER, arguments);
     }
 
-    list_checkpoints(path:Path, options) {
+    list_checkpoints(path:String, options) {
         return this._route_function(
             'list_checkpoints',
             [ArgType.PATH, ArgType.OTHER],

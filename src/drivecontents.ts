@@ -10,7 +10,6 @@ import nbformat = require('./nbformat');
 import iface = require('./content_interface');
 
 import Notebook = nbformat.Notebook;
-import Path = iface.Path
 import IContents = iface.IContents
 import CheckpointId = iface.CheckpointId
 
@@ -75,12 +74,12 @@ var contentsModelToMetadataAndBytes = function(model:any):[any, string] {
  * TODO: check that date formats are the same, and either
  * convert to the IPython format, or document the difference.
  *
- * @param {string} path Path of resoure (including file name)
+ * @param {string} path String of resoure (including file name)
  * @param {Object} resource Google Drive files resource
  * @return {Object} IPEP 27 compliant contents model
  */
 // TODO remove contents ?
-var files_resource_to_contents_model = function(path:Path, resource:any, content?:any) {
+var files_resource_to_contents_model = function(path:String, resource:any, content?:any) {
     var title = resource['title'];
     var mimetype = resource['mimeType'];
 
@@ -237,7 +236,7 @@ export class GoogleDriveContents implements IContents {
     /**
      * Notebook Functions
      */
-    get(path:Path, options:any) {
+    get(path:String, options:any) {
         console.log("[drivecontent.ts], will get", path)
         var that = this;
         var metadata_prm = gapiutils.gapi_ready.then(
@@ -270,7 +269,7 @@ export class GoogleDriveContents implements IContents {
      *      ext: file extension to use
      *      type: model type to create ('notebook', 'file', or 'directory')
      */
-    new_untitled(path:Path, options:{type?:String
+    new_untitled(path:String, options:{type?:String
                                       ext?:String}):any {
         // Construct all data needed to upload file
         var default_ext = '';
@@ -317,12 +316,12 @@ export class GoogleDriveContents implements IContents {
             return this._upload_new(folder_id, model);
         })
         .then(function(resource) {
-            var fullpath = <Path>utils.urlPathJoin(<string>path, <string>resource['title']);
+            var fullpath = <String>utils.urlPathJoin(<string>path, <string>resource['title']);
             return files_resource_to_contents_model(fullpath, resource);
         });
     }
 
-    delete(path:Path) {
+    delete(path:String) {
         return gapiutils.gapi_ready
         .then(function() {
             return driveutils.getIdForPath(path, iface.FileType.FILE);
@@ -332,7 +331,7 @@ export class GoogleDriveContents implements IContents {
         });
     }
 
-    rename(path:Path, new_path:Path) {
+    rename(path:String, new_path:String) {
         var that = this;
         // Rename is only possible when path and new_path differ except in
         // their last component, so check this first.
@@ -340,8 +339,8 @@ export class GoogleDriveContents implements IContents {
         var new_path_components = driveutils.splitPath(new_path);
 
         var base_path:String[] = [];
-        var name:Path;
-        var new_name:Path;
+        var name:String;
+        var new_name:String;
         if (path_components.length != new_path_components.length) {
             return Promise.reject(new Error('Rename cannot change path'));
         }
@@ -382,9 +381,9 @@ export class GoogleDriveContents implements IContents {
      * If the resource has been modifeied on Drive in the
      * meantime, prompt user for overwrite.
      **/
-    save(path:Path, model:any, options?:any) {
+    save(path:String, model:any, options?:any) {
         var that = this;
-        var path_and_filename = <Path[]>utils.urlPathSplit(<string>path);
+        var path_and_filename = <String[]>utils.urlPathSplit(<string>path);
         var path = path_and_filename[0];
         var filename = path_and_filename[1];
         return driveutils.getResourceForPath(<string>path, iface.FileType.FOLDER)
@@ -409,7 +408,7 @@ export class GoogleDriveContents implements IContents {
     }
 
 
-    copy(path:Path, model:any) {
+    copy(path:String, model:any) {
         return Promise.reject(new Error('Copy not implemented yet.'));
     }
 
@@ -419,7 +418,7 @@ export class GoogleDriveContents implements IContents {
 
     // NOTE: it would be better modify the API to combine create_checkpoint with
     // save
-    create_checkpoint(path:Path, options:any) {
+    create_checkpoint(path:String, options:any) {
         var that = this;
         return gapiutils.gapi_ready
         .then(driveutils.getIdForPath.bind(this, path, iface.FileType.FILE))
@@ -445,7 +444,7 @@ export class GoogleDriveContents implements IContents {
         });
     }
 
-    restore_checkpoint(path:Path, checkpoint_id:CheckpointId, options:Object) {
+    restore_checkpoint(path:String, checkpoint_id:CheckpointId, options:Object) {
         var file_id_prm = gapiutils.gapi_ready
         .then(driveutils.getIdForPath.bind(this, path, iface.FileType.FILE))
 
@@ -468,7 +467,7 @@ export class GoogleDriveContents implements IContents {
         });
     }
 
-    list_checkpoints(path:Path, options:any) {
+    list_checkpoints(path:String, options:any) {
         return gapiutils.gapi_ready
         .then(driveutils.getIdForPath.bind( this, path, iface.FileType.FILE))
         .then(function(file_id:String) {
@@ -509,7 +508,7 @@ export class GoogleDriveContents implements IContents {
      *     success: success callback
      *     error: error callback
      */
-    list_contents(path:Path, options:Object):Promise<any>{
+    list_contents(path:String, options:Object):Promise<any>{
         var that = this;
         return gapiutils.gapi_ready
         .then(driveutils.getIdForPath.bind(this, path, iface.FileType.FOLDER))
@@ -547,7 +546,7 @@ export class GoogleDriveContents implements IContents {
         })
         .then(function(items:any[]) {
             var list = items.map(function(resource, index) {
-                var fullpath = <Path>utils.urlPathJoin(<string>path, resource['title']);
+                var fullpath = <String>utils.urlPathJoin(<string>path, resource['title']);
                 return files_resource_to_contents_model(fullpath, resource);
             });
             return {content: list};
