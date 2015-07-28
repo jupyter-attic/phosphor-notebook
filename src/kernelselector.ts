@@ -133,7 +133,7 @@ class KernelSelector {
 /**
  * Sort kernel names.
  */
-function _sortedNames(kernelspecs: Map<string, IKernelSpecId>) {
+function _sortedNames(kernelspecs: Map<string, IKernelSpecId>): string[] {
   return Object.keys(kernelspecs).sort(function (a, b) {
     // sort by display_name
     var da = kernelspecs.get(a).spec.display_name;
