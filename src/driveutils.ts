@@ -28,9 +28,12 @@ export class RTList implements nbformat.IList<Cell>{
   }
 
   getObject(index: number) {
-    return <Object>this._gl.get(index)
+    return <Object>this._gl.get(index);
   }
   
+  get length():number{
+    return this.count;
+  }
   get count():number {
     return this._gl.length
   }
@@ -83,9 +86,26 @@ export class RTNotebook implements INotebookInterface {
   _model:any;
   _cells:any;
 
-  constructor(gd:any, model:any){
+  constructor(gd:any, model:any, data?:nbformat.INotebookInterface){
     this._gd = gd
     this._model = model
+    if(data !== undefined){
+      this._gd.set('metadata', data.metadata)
+      this._gd.set('nbformat', data.nbformat)
+      this._gd.set('nbformat_minor', data.nbformat_minor)
+      //this._gd.get('cells').clear()
+      for(var j=0; j<data.cells.length; j++){
+        var ccell = data.cells.get(j);
+        var rtc = model.createMap({
+                'cell_type': ccell.cell_type,
+                'source': model.createString(ccell.source),
+            })
+        if(ccell.cell_type == 'code'){
+            rtc.set('outputs', model.createList((<any>ccell).outputs||[]))
+        }
+        this._gd.get('cells').push(rtc )
+      }
+    }
     /*for(var i=0; i<10; i++){
       var ctype = rtype();
       console.log('creating', ctype)
@@ -360,7 +380,7 @@ export var GET_CONTENTS_EXPONENTIAL_BACKOFF_FACTOR = 2.0;
  *     Should be set when already_picked is true.
  * @return {Promise} A promise fullfilled by file contents.
  */
-export var getContents = function(resource, already_picked:boolean, opt_num_tries?) {
+export var getContents = function(resource, already_picked:boolean, opt_num_tries?, data?) {
     if (resource['downloadUrl']) {
       var _h = {resolve:null, reject:null};
       var real_time_model = new Promise(function(resolve, reject){
@@ -387,7 +407,7 @@ export var getContents = function(resource, already_picked:boolean, opt_num_trie
             root.set('cells', model.createList())
         }
         console.log("[driveutils] will resolve _h to thing")
-        return _h.resolve(new RTNotebook(root, model))
+        return _h.resolve(new RTNotebook(root, model, data))
       })
       console.warn("[driveutils] will return ", real_time_model);
       return real_time_model;

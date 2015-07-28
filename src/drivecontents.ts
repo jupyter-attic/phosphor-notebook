@@ -236,7 +236,7 @@ export class GoogleDriveContents implements IContents {
     /**
      * Notebook Functions
      */
-    get(path:String, options:any) {
+    get(path:String, options:any, data?) {
         console.log("[drivecontent.ts], will get", path)
         var that = this;
         var metadata_prm = gapiutils.gapi_ready.then(
@@ -248,7 +248,7 @@ export class GoogleDriveContents implements IContents {
         var contents_prm = metadata_prm.then(function(resource:any) {
             console.log("[drivecontents] metadata promise fullfilled")
             that._observe_file_resource(resource);
-            return driveutils.getContents(resource, false);
+            return driveutils.getContents(resource, false, undefined, data);
         });
 
         return Promise.all([metadata_prm, contents_prm]).then(function(values) {

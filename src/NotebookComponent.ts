@@ -168,7 +168,7 @@ class MarkdownCellComponent extends BaseComponent<rtmodel.IRTMarkdownCell> {
     marked(t.html, { sanitize: true, renderer: renderer}, (err: any, html: string) => {
         this.node.innerHTML = mathjaxutils.replace_math(html, t.math);
         // TODO: do some serious sanitization, using, for example, the caja sanitizer
-        // MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.node]);
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.node]);
     });
   }
 }
@@ -195,7 +195,6 @@ var on_del = function(cm){
     return function(evts:IRTStringEvent):void{
         var from = fromAbsoluteCursorPos(cm, evts.index);
         var to   = fromAbsoluteCursorPos(cm, evts.index+evts.text.length);
-        console.log("<<<<<<<< receive events", evts, "convert to remove from :" , from, "to ", to )
         cm.getDoc().replaceRange('', from, to, '+remote_sync');
     }
 };
@@ -225,7 +224,6 @@ class CodeCellComponent extends BaseComponent<rtmodel.IRTCodeCell> {
     // in batch operation. That shoudl make a difference for
     // combining changes like commenting.
     this._editor.on('change', (cm, change) => {
-        console.log("[NotebookComponent] handeling change of type", change.origin)
         if(change.origin === 'setValue'){
           return
         }
@@ -257,7 +255,7 @@ class CodeCellComponent extends BaseComponent<rtmodel.IRTCodeCell> {
             var len= change.text.reduce(function(s, next) {
                 return s + next.length;
             }, 0);
-            // from-to is not correct on multiline paste. 
+            // from-to is not correct on multiline paste.
             this._editor.getDoc().markText({line:change.from.line, ch:change.from.ch},
                                            {line:change.to.line, ch:change.to.ch+1+len},
                                            {css:'background-color: #DDF;', title:'Nyan Cat cursor'})
@@ -284,6 +282,7 @@ class CodeCellComponent extends BaseComponent<rtmodel.IRTCodeCell> {
   renderOutput(): Elem[] {
     var r: Elem[] = [];
     var outputs: rtmodel.IRTOutput[] = this.data.outputs;
+    console.log("[NotebookComponents] this cell has outputs;", outputs)
     for(var i = 0; i < outputs.length; i++) {
       var x = outputs[i];
       switch(x.output_type) {
@@ -323,7 +322,11 @@ class CellAcessor implements rtmodel.IRTBaseCell{
   }
   
   get cell_type():string{
-    return this._thing.cell_type||this._thing.get('cell_type')
+    try {
+      return this._thing.cell_type||this._thing.get('cell_type')
+    } catch (e) {
+      debugger; 
+    }
   }
   
   get metadata():Object{
@@ -339,7 +342,13 @@ class CellAcessor implements rtmodel.IRTBaseCell{
   }
   
   get outputs(){
-    return this._thing.output ||[]
+    var out = this._thing.get('outputs')
+    var res = []
+    for(var i=0; i < out.length; i++){
+        res.push(out.get(i))
+    }
+    return res
+    
   }
 
 }
@@ -348,9 +357,12 @@ class CellAcessor implements rtmodel.IRTBaseCell{
 class NotebookComponent extends Component<rtmodel.INotebookRTModel> {
   render() {
     console.info("[NotebookComponent] rendering notebook...")
-    var cells = this.data.cells;
+    var cells:rtmodel.IRTCellList = this.data.cells;
     var r: Elem[] = [];
     for(var i = 0; i < cells.count; i++) {
+      if(cells.get(i) == null){
+        debugger;
+      }
       var c = <any>(new CellAcessor(cells.get(i)));
       switch(c.cell_type) {
         case "code":

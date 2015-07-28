@@ -17,6 +17,7 @@ interface MimeBundle {
 export
 interface IList<T> {
   count:number;
+  length:number;
   get(index:number):T
   set(index:number, value:T):void
   insert(index:number, value:T):void
@@ -38,6 +39,10 @@ export class BasicList<T> implements IList<T> {
 
   get count(){
     return this._list.length
+  }
+  
+  get length(){
+    return this.count
   }
 
   set(index:number, value:T){

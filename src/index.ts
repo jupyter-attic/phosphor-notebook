@@ -15,7 +15,10 @@ export function main(): void {
       base_url:'',
       common_config:{}
     })
-    ct.get('AAAAA.ipynb',{}).then(function(data){
+    // creat rt model from demo.data
+    var basemodel = demo.notebook;
+    
+    ct.get('AAAAA.ipynb',{}, undefined).then(function(data){
       console.info('[index.ts] Will rerender with new Drive content')
       rerender(data.content)
     })
