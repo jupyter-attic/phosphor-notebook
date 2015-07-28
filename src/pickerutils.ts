@@ -17,7 +17,7 @@ declare var gapi:any;
  * @param {Promise} a Promise resolved when user selects file, or rejected if
  *     they cancel.
  */
-export function pick_file(parent_id, filename):any {
+export function pick_file(parent_id?, filename?):any {
     return new Promise(function(resolve, reject) {
         var callback = function(response) {
             if (response['action'] == google.picker.Action.CANCEL) {
@@ -26,16 +26,21 @@ export function pick_file(parent_id, filename):any {
                 error.name = 'DriveDownloadError';
                 reject(error);
             } else if (response['action'] == google.picker.Action.PICKED) {
-                resolve();
+                //debugger;
+                resolve(response.docs[0].name);
             }
         };http://elacave.lmdb.eu/~carreau/ml/Matlab-R2011a-unix-mac.iso
         var builder = new google.picker.PickerBuilder();
 
         var search_view = new google.picker.DocsView(google.picker.ViewId.DOCS)
-            .setMode(google.picker.DocsViewMode.LIST)
-            .setParent(parent_id)
-            .setQuery(filename);
-
+            .setMode(google.picker.DocsViewMode.LIST);
+        if(parent_id){
+            search_view = search_view.setParent(parent_id)
+        }
+        if(filename){
+            search_view = search_view.setQuery(filename);
+        }
+        
         var picker = builder
             .addView(search_view)
             .setOAuthToken(gapi.auth.getToken()['access_token'])

@@ -89,7 +89,7 @@ export class RTNotebook implements INotebookInterface {
   constructor(gd:any, model:any, data?:nbformat.INotebookInterface){
     this._gd = gd
     this._model = model
-    if(data !== undefined){
+    if(data !== undefined && ( this._gd.get('cells').length === 0) ){
       this._gd.set('metadata', data.metadata)
       this._gd.set('nbformat', data.nbformat)
       this._gd.set('nbformat_minor', data.nbformat_minor)

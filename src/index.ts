@@ -3,7 +3,9 @@ import NotebookComponent = require("./NotebookComponent");
 import render = phosphor.virtualdom.render;
 import demo = require("./demodata")
 import mathjaxutils = require("./mathjaxutils");
-import contents = require("./drivecontents")
+import contents = require("./drivecontents");
+import pickerutils = require("./pickerutils");
+import gapiutils = require("./gapiutils")
 
 export function main(): void {
     //    var notebook = new NotebookApp.NotebookApplication;
@@ -17,11 +19,15 @@ export function main(): void {
     })
     // creat rt model from demo.data
     var basemodel = demo.notebook;
-    
-    ct.get('AAAAA.ipynb',{}, undefined).then(function(data){
-      console.info('[index.ts] Will rerender with new Drive content')
-      rerender(data.content)
-    })
+    gapiutils.gapi_ready.then(function(){
+      pickerutils.pick_file().then(function(data){
+        ct.get(data ,{}, basemodel).then(function(data){
+          console.info('[index.ts] Will rerender with new Drive content')
+          rerender(data.content)
+        })
+        // debugger;
+      })
+    }, 1000)
 };
 
 export function rerender(data?): void {
