@@ -37,7 +37,7 @@ interface IKernelSpec {
 /**
  * KernelSpecId interface.
  */
- export
+export
 interface IKernelSpecId {
   name: string;
   spec: IKernelSpec;
@@ -82,7 +82,7 @@ class KernelSelector {
             validateKernelSpec(ks);
             this._kernelspecs.set(ks.name, ks);
           }
-      });
+    });
   }
 
   /**
@@ -107,7 +107,7 @@ class KernelSelector {
       var available = _sortedNames(kernelspecs);
       var matches: string[] = [];
       if (language && language.length > 0) {
-        available.map(function(name) {
+        available.map((name: string) => {
           if (kernelspecs.get(name).spec.language.toLowerCase() === language.toLowerCase()) {
               matches.push(name);
           }
@@ -126,7 +126,7 @@ class KernelSelector {
  * Sort kernel names.
  */
 function _sortedNames(kernelspecs: Map<string, IKernelSpecId>): string[] {
-  return Object.keys(kernelspecs).sort(function (a, b) {
+  return Object.keys(kernelspecs).sort((a, b) => {
     // sort by display_name
     var da = kernelspecs.get(a).spec.display_name;
     var db = kernelspecs.get(b).spec.display_name;
