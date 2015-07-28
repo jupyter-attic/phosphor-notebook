@@ -99,7 +99,7 @@ class KernelSelector {
   }
 
   /**
-   * Find a kernel names by language.
+   * Find kernel names by language.
    */
   findByLanguage(language: string): Promise<string[]> {
     return this._loaded.then(() => {
