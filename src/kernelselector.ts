@@ -86,22 +86,22 @@ class KernelSelector {
   }
 
   /**
-   * Select a kernel by name, ensuring kernelspecs have been loaded.
+   * Select a kernel.
    */
   select(kernel: string | IKernelSpecId): Promise<IKernelSpecId> {
     if (typeof kernel === 'string') {
       kernel = <IKernelSpecId>{name: kernel};
     }
     var selected = <IKernelSpecId>kernel;
-    return this._loaded.then(function() {
+    return this._loaded.then(() => {
         return this._kernelspecs.get(selected.name);
     });
   }
 
   /**
-   * Select a kernel by language.
+   * Find a kernel by language.
    */
-  selectByLanguage(kernel: string | IKernelSpecId): Promise<IKernelSpecId> {
+  findByLanguage(kernel: string | IKernelSpecId): Promise<string[]> {
     return this.select(kernel).then((selected: IKernelSpecId) => {
       if (selected !== undefined) {
           return selected;
@@ -117,11 +117,7 @@ class KernelSelector {
           }
         });
       }
-      if (matches.length === 1) {
-        return kernelspecs.get(matches[0]);
-      } else {
-
-      }
+      return matches;
     });
   }
 
