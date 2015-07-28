@@ -99,17 +99,13 @@ class KernelSelector {
   }
 
   /**
-   * Find a kernel by language.
+   * Find a kernelspecs by language.
    */
-  findByLanguage(kernel: string | IKernelSpecId): Promise<string[]> {
-    return this.select(kernel).then((selected: IKernelSpecId) => {
-      if (selected !== undefined) {
-          return selected;
-      }
+  findByLanguage(language: string): Promise<string[]> {
+    return this._loaded.then(() => {
       var kernelspecs = this._kernelspecs;
       var available = _sortedNames(kernelspecs);
       var matches: string[] = [];
-      var language = selected.spec.language;
       if (language && language.length > 0) {
         available.map(function(name) {
           if (kernelspecs.get(name).spec.language.toLowerCase() === language.toLowerCase()) {
