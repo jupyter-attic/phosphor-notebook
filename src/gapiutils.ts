@@ -47,7 +47,7 @@ var FILES_OAUTH_SCOPE = 'https://www.googleapis.com/auth/drive.file';
  * @type {string}
  */
 var METADATA_OAUTH_SCOPE = 'https://www.googleapis.com/auth/drive.readonly.metadata';
-
+var READONLY_SCOPE = 'https://www.googleapis.com/auth/drive.readonly'
 /**
  * Error message for origin mismatch error.
  * @type {string}
@@ -190,6 +190,7 @@ var authorize = function(opt_withPopup:boolean, conf:any):Promise<any> {
     if(config.METADATA_SCOPE){
       scope.push(METADATA_OAUTH_SCOPE)
     }
+    scope.push(READONLY_SCOPE)
     var authorize_internal = function() {
         return new Promise(function(resolve, reject) {
             gapi.auth.authorize({
