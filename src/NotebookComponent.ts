@@ -223,6 +223,19 @@ class CodeCellComponent extends BaseComponent<rtmodel.IRTCodeCell> {
     // change tha to changes at some point that are triggerd
     // in batch operation. That shoudl make a difference for
     // combining changes like commenting.
+    //this._editor.on('changes', (cm, changes) => {
+      //debugger;
+    //})
+   
+    // Cannot use beforeChange here as the chace event does not have a `removed`
+    // field. We could compute this ourself.
+    // we might want to use `beforeChange`, as for multiple cursors the events emitted by
+    // codemirror are in a pre-change coordinate system, that we change to a character
+    // index using a post-change value of the document that lead to errors on `operations`
+    // we should also have a look at `changes` that groups events per operations.
+    // last possibility is to actually use a list of string and map the insertions
+    // of new lines to insertinos of list in this thing.
+    // I not sure in which of this painful path we want to venture.
     this._editor.on('change', (cm, change) => {
         if(change.origin === 'setValue'){
           return
@@ -238,16 +251,17 @@ class CodeCellComponent extends BaseComponent<rtmodel.IRTCodeCell> {
           || origin === 'cut'
           || origin === 'drag'
             ){
-            var index = toAbsoluteCursorPosition(cm.getDoc(), change.from)
+            // there is s abug around with multicursors.
+            var index = toAbsoluteCursorPosition(cm.getDoc(), change.from);
             // handle insertion of new lines.
-            //
             var text = change.text.join('\n');
-            
             if(change.removed.length !== 0){
+              console.log("[NotebookComponent], got a removed changed", change.removed)
               var endIndex = index + change.removed.join('').length
               endIndex += change.removed.length-1;
               source.deleteRange(index, endIndex);
             }
+            console.log("[NotebookComponent], get change: ", change, "at index", index);
             if(text.length > 0){
               source.insert(index, text)
             }
