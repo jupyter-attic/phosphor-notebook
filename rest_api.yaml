@@ -33,6 +33,12 @@ parameters:
     in: path
     description: file path
     type: string
+  checkpoint_id:
+    name: checkpoint_id
+    required: true
+    in: path
+    description: Checkpoint id for a file
+    type: string
 
 paths:
   /contents/{path}:
@@ -227,6 +233,32 @@ paths:
               reason:
                 type: string
                 description: Explanation of error reason
+  /contents/{path}/checkpoints/{checkpoint_id}:
+    post:
+      summary: Restore a file to a particular checkpointed state
+      tags:
+        - contents
+      responses:
+        204:
+          description: Checkpoint created
+        400:
+          description: Bad request
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error condition
+              reason:
+                type: string
+                description: Explanation of error reason
+    delete:
+      summary: Delete a checkpoint
+      tags:
+        - contents
+      responses:
+        204:
+          description: Checkpoint deleted
   /sessions/{session}:
     parameters:
       - $ref: '#/parameters/session'
