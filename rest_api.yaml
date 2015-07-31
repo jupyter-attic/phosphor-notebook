@@ -137,13 +137,13 @@ paths:
               path:
                 type: string
                 format: path
-                description: New path for file or directory.
+                description: New path for file or directory
       responses:
         200:
           description: Path updated
           headers:
             Location:
-              description: Updated URL for the file or directory.
+              description: Updated URL for the file or directory
               type: string
               format: url
         400:
@@ -157,6 +157,18 @@ paths:
               reason:
                 type: string
                 description: Explanation of error reason
+    delete:
+      summary: Delete a file in the given path
+      tags:
+        - contents
+      responses:
+        204:
+          description: File deleted
+          headers:
+            Location:
+              description: URL for the removed file
+              type: string
+              format: url
   /sessions/{session}:
     parameters:
       - $ref: '#/parameters/session'
