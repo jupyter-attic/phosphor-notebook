@@ -199,6 +199,49 @@ var on_del = function(cm){
     }
 };
 
+var onchange = (cm:CodeMirror.Editor, change:CodeMirror.EditorChange, source?) => {
+    console.info("[NotebookComponent] onchange called")
+    if(change.origin === 'setValue'){
+      return
+    }
+    // TODO need to handle undo/redo
+    var origin = change.origin;
+    if(  origin === '+input'
+      || origin === '+delete'
+      || origin === '*compose'
+      || origin === 'paste'
+      || origin === 'undo'
+      || origin === 'redo'
+      || origin === 'cut'
+      || origin === 'drag'
+        ){
+        // there is s abug around with multicursors.
+        var index = toAbsoluteCursorPosition(cm.getDoc(), change.from);
+        // handle insertion of new lines.
+        var text = change.text.join('\n');
+        if(change.removed.length !== 0){
+          console.log("[NotebookComponent], got a removed changed", change.removed)
+          var endIndex = index + change.removed.join('').length
+          endIndex += change.removed.length-1;
+          source.deleteRange(index, endIndex);
+        }
+        console.log("[NotebookComponent], get change: ", change, "at index", index);
+        if(text.length > 0){
+          source.insert(index, text)
+        }
+      } else if (change.origin === '+remote_sync'){
+        var len= change.text.reduce(function(s, next) {
+            return s + next.length;
+        }, 0);
+        // from-to is not correct on multiline paste.
+        cm.getDoc().markText({line:change.from.line, ch:change.from.ch},
+                                       {line:change.to.line, ch:change.to.ch+1+len},
+                                       {css:'background-color: #DDF;', title:'Nyan Cat cursor'})
+      } else {
+        console.log("[NotebookComponent] Non known change, not updating model to avoid recursive update", change)
+      }
+}
+
 /**
  * We inherit from BaseComponent so that we can explicitly control the rendering.  We want to use the virtual dom to render
  * the output, but we want to explicitly manage the code editor.
@@ -227,55 +270,40 @@ class CodeCellComponent extends BaseComponent<rtmodel.IRTCodeCell> {
       //debugger;
     //})
    
-    // Cannot use beforeChange here as the chace event does not have a `removed`
+    // - Cannot use beforeChange here as the chace event does not have a `removed`
     // field. We could compute this ourself.
-    // we might want to use `beforeChange`, as for multiple cursors the events emitted by
+    // - We might want to use `beforeChange`, as for multiple cursors the events emitted by
     // codemirror are in a pre-change coordinate system, that we change to a character
     // index using a post-change value of the document that lead to errors on `operations`
-    // we should also have a look at `changes` that groups events per operations.
+    // - We should also have a look at `changes` that groups events per operations.
     // last possibility is to actually use a list of string and map the insertions
     // of new lines to insertinos of list in this thing.
-    // I not sure in which of this painful path we want to venture.
-    this._editor.on('change', (cm, change) => {
-        if(change.origin === 'setValue'){
-          return
-        }
-        // TODO need to handle undo/redo
-        var origin = change.origin;
-        if(  origin === '+input'
-          || origin === '+delete'
-          || origin === '*compose'
-          || origin === 'paste'
-          || origin === 'undo'
-          || origin === 'redo'
-          || origin === 'cut'
-          || origin === 'drag'
-            ){
-            // there is s abug around with multicursors.
-            var index = toAbsoluteCursorPosition(cm.getDoc(), change.from);
-            // handle insertion of new lines.
-            var text = change.text.join('\n');
-            if(change.removed.length !== 0){
-              console.log("[NotebookComponent], got a removed changed", change.removed)
-              var endIndex = index + change.removed.join('').length
-              endIndex += change.removed.length-1;
-              source.deleteRange(index, endIndex);
+    // - I not sure in which of this painful path we want to venture.
+    // - `changes` does not only have bundeled changes on multicursor,
+    // it does also trigger on newlines insertions and "Electric Chars" that auto-insert
+    // the correct number of space for indentation...
+    this._editor.on('changes', (cm, changes) => {
+      console.info("[NotebookComponent] reacting to changes");
+      if(changes.length >= 1){
+        console.log("[NotebookComponent]: got multiple changes at once (", changes.length ,"), is it a multi-cursor ?")
+        console.log("[NotebookComponent]:", changes)
+        var ch = {line:0, ch:0};
+        for(var i=0; i < changes.length; i++){
+          if(ch.line < changes[i].from.line){
+            ch = changes[i].from;
+            continue;
+            if(ch.line < changes[i].from.line){
+              ch = changes[i].from;
+              continue
             }
-            console.log("[NotebookComponent], get change: ", change, "at index", index);
-            if(text.length > 0){
-              source.insert(index, text)
-            }
-          } else if (change.origin === '+remote_sync'){
-            var len= change.text.reduce(function(s, next) {
-                return s + next.length;
-            }, 0);
-            // from-to is not correct on multiline paste.
-            this._editor.getDoc().markText({line:change.from.line, ch:change.from.ch},
-                                           {line:change.to.line, ch:change.to.ch+1+len},
-                                           {css:'background-color: #DDF;', title:'Nyan Cat cursor'})
-          } else {
-            console.log("[NotebookComponent] Non known change, not updating model to avoid recursive update", change)
+            console.log("[NotebookComponent]: got unordered changes", changes)
           }
+        }
+      }
+      console.info("[Notebook Component] looping through N changes", changes.length);
+      for(var i=changes.length-1; i>=0 ; i--){
+        onchange(cm, changes[i], source)
+      }
     });
     
     source.oninsert(on_add(this._editor));
