@@ -77,7 +77,7 @@ paths:
                 type: string
                 description: Explanation of error reason
         200:
-          description: Contents of file or directory.
+          description: Contents of file or directory
           headers:
             Last-Modified:
               description: Last modified date for file
@@ -95,7 +95,7 @@ paths:
       parameters:
         - name: model
           in: body
-          description: 
+          description: Path of file to copy
           schema:
             type: object
             properties:
@@ -106,13 +106,48 @@ paths:
           description: File created
           headers:
             Location:
-              description: URL for the new file.
+              description: URL for the new file
               type: string
               format: url
         404:
           description: No item found
         400:
           description: Bad request
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error condition
+              reason:
+                type: string
+                description: Explanation of error reason
+    patch:
+      summary: Rename a file or directory without re-uploading content
+      tags:
+        - contents
+      parameters:
+        - name: model
+          in: body
+          required: true
+          description: New path for file or directory.
+          schema:
+            type: object
+            properties:
+              path:
+                type: string
+                format: path
+                description: New path for file or directory.
+      responses:
+        200:
+          description: Path updated
+          headers:
+            Location:
+              description: Updated URL for the file or directory.
+              type: string
+              format: url
+        400:
+          description: No data provided
           schema:
             type: object
             properties:
