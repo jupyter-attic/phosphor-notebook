@@ -185,19 +185,16 @@ paths:
                 description: The new filename if changed
               path:
                 type: string
-                format: path
                 description: New path for file or directory
               type:
                 type: string
-                in: query
-                description: Path type ('notebook', 'file', 'directory')
+                description: Path dtype ('notebook', 'file', 'directory')
               format:
                 type: string
-                in: query
                 description: File format ('json', 'text', 'base64')
               content:
                 type: string
-                description: The actual body of the document, excluding 'type=directory'
+                description: The actual body of the document excluding directory type
       responses:
         201:
           description: Path updated
