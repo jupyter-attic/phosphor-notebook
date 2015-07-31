@@ -115,6 +115,8 @@ paths:
               description: URL for the new file
               type: string
               format: url
+          schema:
+            $ref: '#/definitions/Contents'
         404:
           description: No item found
         400:
@@ -152,6 +154,60 @@ paths:
               description: Updated URL for the file or directory
               type: string
               format: url
+          schema:
+            $ref: '#/definitions/Contents'
+        400:
+          description: No data provided
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error condition
+              reason:
+                type: string
+                description: Explanation of error reason
+    put:
+      summary: Save an existing file
+      description: Update an existing file in-place. This is how standard saves are performed.  Returns the updated model without content.
+      tags:
+        - contents
+      parameters:
+        - name: model
+          in: body
+          required: true
+          description: New path for file or directory
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The new filename (`my notebook.ipynb`), if changed
+              path:
+                type: string
+                format: path
+                description: New path for file or directory
+              type:
+                type: string
+                in: query
+                description: One of ('notebook', 'file', 'directory')
+              format:
+                type: string
+                in: query
+                description: One of ('json', 'text', 'base64')
+              content:
+                type: string
+                description: The actual body of the document (excluding 'type=directory')
+      responses:
+        201:
+          description: Path updated
+          headers:
+            Location:
+              description: Updated URL for the file or directory
+              type: string
+              format: url
+          schema:
+            $ref: '#/definitions/Contents'
         400:
           description: No data provided
           schema:
