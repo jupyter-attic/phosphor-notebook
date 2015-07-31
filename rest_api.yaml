@@ -197,7 +197,7 @@ paths:
                 description: File format ('json', 'text', 'base64')
               content:
                 type: string
-                description: The actual body of the document (excluding 'type=directory')
+                description: The actual body of the document, excluding 'type=directory'
       responses:
         201:
           description: Path updated
