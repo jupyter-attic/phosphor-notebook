@@ -182,7 +182,7 @@ paths:
             properties:
               name:
                 type: string
-                description: The new filename (`my notebook.ipynb`), if changed
+                description: The new filename if changed
               path:
                 type: string
                 format: path
