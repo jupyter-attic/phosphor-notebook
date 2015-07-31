@@ -66,7 +66,7 @@ paths:
             - base64
         - name: content
           in: query
-          description: return content (0 for no content, 1 for return content)
+          description: Return content (0 for no content, 1 for return content)
           type: integer
       responses:
         404:
@@ -190,11 +190,11 @@ paths:
               type:
                 type: string
                 in: query
-                description: One of ('notebook', 'file', 'directory')
+                description: Path type ('notebook', 'file', 'directory')
               format:
                 type: string
                 in: query
-                description: One of ('json', 'text', 'base64')
+                description: File format ('json', 'text', 'base64')
               content:
                 type: string
                 description: The actual body of the document (excluding 'type=directory')
