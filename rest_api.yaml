@@ -169,6 +169,64 @@ paths:
               description: URL for the removed file
               type: string
               format: url
+  /contents/{path}/checkpoints:
+    parameters:
+      - $ref: '#/parameters/path'
+    get:
+      summary: Get a list of checkpoints for a file
+      description: List checkpoints for a given file. There will typically be zero or one results.
+      tags:
+        - contents
+      responses:
+        404:
+          description: No item found
+        400:
+          description: Bad request
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error condition
+              reason:
+                type: string
+                description: Explanation of error reason
+        200:
+          description: List of checkpoints for a file
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Checkpoints'
+        500:
+          description: Model key error
+    post:
+      summary: Create a new checkpoint for a file
+      description: Create a new checkpoint with the current state of a file. With the default FileContentsManager, only one checkpoint is supported, so creating new checkpoints clobbers existing ones.
+      tags:
+        - contents
+      responses:
+        201:
+          description: Checkpoint created
+          headers:
+            Location:
+              description: URL for the checkpoint
+              type: string
+              format: url
+          schema:
+            $ref: '#/definitions/Checkpoints'
+        404:
+          description: No item found
+        400:
+          description: Bad request
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error condition
+              reason:
+                type: string
+                description: Explanation of error reason
   /sessions/{session}:
     parameters:
       - $ref: '#/parameters/session'
@@ -546,3 +604,17 @@ definitions:
       format:
         type: string
         description: Format of content (one of null, 'text', 'base64', 'json')
+  Checkpoints:
+    description: A checkpoint object.
+    type: object
+    required:
+      - id
+      - last_modified
+    properties:
+      id:
+        type: string
+        description: Unique id for the checkpoint.
+      last_modified:
+        type: string
+        description: Last modified timestamp
+        format: dateTime
