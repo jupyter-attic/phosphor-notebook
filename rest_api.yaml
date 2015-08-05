@@ -46,7 +46,7 @@ paths:
       - $ref: '#/parameters/path'
     get:
       summary: Get contents of file or directory
-      description: A client can optionally specify a type and/or format argument via URL parameter. When given, the Contents service shall return a model in the requested type and/or format. If the request cannot be satisfied, e.g. type=text is requested, but the file is binary, then the request shall fail with 400 and have a JSON response containing a 'reason' field, with the value 'bad format' or 'bad type', depending on what was requested.
+      description: "A client can optionally specify a type and/or format argument via URL parameter. When given, the Contents service shall return a model in the requested type and/or format. If the request cannot be satisfied, e.g. type=text is requested, but the file is binary, then the request shall fail with 400 and have a JSON response containing a 'reason' field, with the value 'bad format' or 'bad type', depending on what was requested."
       tags:
         - contents
       parameters:
@@ -59,14 +59,14 @@ paths:
             - directory
         - name: format
           in: query
-          description: How file content should be returned ('text', 'base64')
+          description: "How file content should be returned ('text', 'base64')"
           type: string
           enum:
             - text
             - base64
         - name: content
           in: query
-          description: Return content (0 for no content, 1 for return content)
+          description: "Return content (0 for no content, 1 for return content)"
           type: integer
       responses:
         404:
@@ -455,11 +455,13 @@ paths:
       responses:
         201:
           description: Kernel started
+          schema:
+            $ref: '#/definitions/Kernel'
           headers:
             Location:
               description: Model for started kernel
-              schema:
-                $ref: '#/definitions/Kernel'
+              type: string
+              format: url
   /kernels/{kernel}:
     parameters:
       - $ref: '#/parameters/kernel'
