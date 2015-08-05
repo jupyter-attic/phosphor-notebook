@@ -457,9 +457,9 @@ paths:
           description: Kernel started
           headers:
             Location:
-              description: URL for kernel commands
-              type: string
-              format: url
+              description: Model for started kernel
+              schema:
+                $ref: '#/definitions/Kernel'
   /kernels/{kernel}:
     parameters:
       - $ref: '#/parameters/kernel'
