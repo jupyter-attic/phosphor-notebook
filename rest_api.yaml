@@ -462,7 +462,7 @@ paths:
               description: Model for started kernel
               type: string
               format: url
-  /kernels/{kernel}:
+  /kernels/{kernel_id}:
     parameters:
       - $ref: '#/parameters/kernel'
     get:
@@ -481,7 +481,7 @@ paths:
       responses:
         204:
           description: Kernel deleted
-  /kernels/{kernel}/interrupt:
+  /kernels/{kernel_id}/interrupt:
     parameters:
       - $ref: '#/parameters/kernel'
     post:
@@ -491,7 +491,7 @@ paths:
       responses:
         204:
           description: Kernel interrupted
-  /kernels/{kernel}/restart:
+  /kernels/{kernel_id}/restart:
     parameters:
       - $ref: '#/parameters/kernel'
     post:
@@ -527,6 +527,19 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/KernelSpec'
+  /kernelspecs/{spec_name}:
+    get:
+      summary: Get a kernel spec by name
+      tags:
+        - kernelspecs
+      responses:
+        200:
+          description: Kernel spec
+          schema:
+            type: object
+            properties:
+              kernelspec:
+                $ref: '#/definitions/KernelSpec'
 
 definitions:
   KernelSpec:
