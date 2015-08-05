@@ -527,39 +527,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/KernelSpec'
-  /kernelspecs/{kernel}:
-    parameters:
-      - $ref: '#/parameters/kernel'
-    get:
-      summary: Kernel information
-      tags:
-        - kernelspecs
-      responses:
-        200:
-          description: The contents of kernel.json
-          schema:
-            $ref: '#/definitions/KernelSpec'
-        404:
-          description: Kernel spec not found
-  /kernelspecs/{kernel}/{filename}:
-    get:
-      summary: Retrieve a file from the kernel directory
-      tags:
-        - kernelspecs
-      parameters:
-        - name: kernel
-          in: path
-          description: Kernel uuid
-          type: string
-          required: true
-        - name: filename
-          in: path
-          description: filename
-          type: string
-          required: true
-      responses:
-        200:
-          description: file
 
 definitions:
   KernelSpec:
