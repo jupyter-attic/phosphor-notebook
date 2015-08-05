@@ -107,6 +107,10 @@ paths:
             properties:
               copy_from:
                 type: string
+              ext:
+                type: string
+              type:
+                type: string
       responses:
         201:
           description: File created
@@ -135,7 +139,7 @@ paths:
       tags:
         - contents
       parameters:
-        - name: model
+        - name: path
           in: body
           required: true
           description: New path for file or directory.
@@ -175,7 +179,6 @@ paths:
       parameters:
         - name: model
           in: body
-          required: true
           description: New path for file or directory
           schema:
             type: object
@@ -196,8 +199,17 @@ paths:
                 type: string
                 description: The actual body of the document excluding directory type
       responses:
+        200:
+          description: File saved
+          headers:
+            Location:
+              description: Updated URL for the file or directory
+              type: string
+              format: url
+          schema:
+            $ref: '#/definitions/Contents'
         201:
-          description: Path updated
+          description: Path created
           headers:
             Location:
               description: Updated URL for the file or directory

@@ -22,6 +22,7 @@ interface IContentsOpts {
   format?: string;
   content?: any;
   ext?: string;
+  name?: string;
 }
 
 
@@ -112,17 +113,19 @@ class Contents implements IContents {
   /**
    * Create a new untitled file or directory in the specified directory path.
    */
-  newUntitled(path: string, options: IContentsOpts): Promise<IContentsModel> {
-    var data = JSON.stringify({
-      ext: options.ext,
-      type: options.type
-    });
-    var settings = {
-      method : "POST",
-      data: data,
-      contentType: 'application/json',
-      dataType : "json",
+  newUntitled(path: string, options?: IContentsOpts): Promise<IContentsModel> {
+    var settings: utils.IAjaxSettings = {
+        method : "POST",
+        dataType : "json",
     };
+    if (options) {
+      var data = JSON.stringify({
+        ext: options.ext,
+        type: options.type
+      });
+      settings.data = data;
+      settings.contentType = 'application/json';
+    }
     var url = this._getUrl(path);
     return utils.ajaxRequest(url, settings).then((success: IAjaxSuccess): IContentsModel => {
       if (success.xhr.status !== 201) {
@@ -183,7 +186,7 @@ class Contents implements IContents {
   /**
    * Save a file.
    */
-  save(path: string, model: any): Promise<IContentsModel> {
+  save(path: string, model: IContentsOpts): Promise<IContentsModel> {
     var settings = {
       method : "PUT",
       dataType: "json",
@@ -192,7 +195,7 @@ class Contents implements IContents {
     };
     var url = this._getUrl(path);
     return utils.ajaxRequest(url, settings).then((success: IAjaxSuccess): IContentsModel => {
-      if (success.xhr.status !== 201) {
+      if (success.xhr.status !== 200) {
         throw Error('Invalid Status: ' + success.xhr.status);
       }
       validateContentsModel(success.data);
@@ -295,7 +298,7 @@ class Contents implements IContents {
     });
   }
 
-  /**
+  /** 
    * List notebooks and directories at a given path.
    */
   listContents(path: string): Promise<IContentsModel> {
