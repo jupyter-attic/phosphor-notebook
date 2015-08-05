@@ -95,7 +95,7 @@ paths:
           description: Model key error
     post:
       summary: Create a new file in the specified path
-      description: A POST to /api/contents/path creates a New untitled, empty file or directory. A POST to /api/contents/path with body {"copy_from", "/path/to/OtherNotebook.ipynb"} creates a new copy of OtherNotebook in path.
+      description: 'A POST to /api/contents/path creates a New untitled, empty file or directory. A POST to /api/contents/path with body {"copy_from": "/path/to/OtherNotebook.ipynb"} creates a new copy of OtherNotebook in path.''
       tags:
         - contents
       parameters:
@@ -172,8 +172,8 @@ paths:
                 type: string
                 description: Explanation of error reason
     put:
-      summary: Save an existing file
-      description: Update an existing file in-place. This is how standard saves are performed.  Returns the updated model without content.
+      summary: Save or upload file.
+      description: "Saves the file in the location specified by name and path.  PUT is very similar to POST, but the requester specifies the name, whereas with POST, the server picks the name."
       tags:
         - contents
       parameters:
@@ -212,7 +212,7 @@ paths:
           description: Path created
           headers:
             Location:
-              description: Updated URL for the file or directory
+              description: URL for the file or directory
               type: string
               format: url
           schema:
