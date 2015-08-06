@@ -55,14 +55,20 @@ class KernelSelector {
    * Create a kernel selector.
    */
   constructor(baseUrl: string) {
-    var url = utils.urlJoinEncode(baseUrl, 
-                                  SESSION_KERNELSPEC_URL);
+    this._kernelspecs = new Map<string, IKernelSpecId>();
+    this._url = utils.urlJoinEncode(baseUrl, 
+                                    SESSION_KERNELSPEC_URL);
+  }
+
+  /**
+   * Request kernelspecs and return a list of kernel names.
+   */
+  load(): Promise<string[]> {
     var settings = {
       method: "GET",
       dataType: "json"
     }
-    this._kernelspecs = new Map<string, IKernelSpecId>();
-    this._loaded = utils.ajaxRequest(url, settings).then(
+    return utils.ajaxRequest(this._url, settings).then(
       (success: utils.IAjaxSuccess) => {
           var err = new Error('Invalid KernelSpec info');
           if (success.xhr.status !== 200) {
@@ -77,48 +83,47 @@ class KernelSelector {
               !Array.isArray(data.kernelspecs)) {
             throw err;
           }
+          var names: string[] = [];
           for (var i = 0; i < data.kernelspecslength; i++) {
             var ks = data.kernelspecs[i]
             validateKernelSpec(ks);
             this._kernelspecs.set(ks.name, ks);
+            names.push(ks.name);
           }
-    });
+          return names;
+      });
   }
 
   /**
    * Select a kernel.
    */
-  select(kernel: string | IKernelSpecId): Promise<IKernelSpecId> {
+  select(kernel: string | IKernelSpecId): IKernelSpecId {
     if (typeof kernel === 'string') {
       kernel = <IKernelSpecId>{name: kernel};
     }
     var selected = <IKernelSpecId>kernel;
-    return this._loaded.then(() => {
-        return this._kernelspecs.get(selected.name);
-    });
+    return this._kernelspecs.get(selected.name);
   }
 
   /**
    * Find kernel names by language.
    */
-  findByLanguage(language: string): Promise<string[]> {
-    return this._loaded.then(() => {
-      var kernelspecs = this._kernelspecs;
-      var available = _sortedNames(kernelspecs);
-      var matches: string[] = [];
-      if (language && language.length > 0) {
-        available.map((name: string) => {
-          if (kernelspecs.get(name).spec.language.toLowerCase() === language.toLowerCase()) {
-              matches.push(name);
-          }
-        });
-      }
-      return matches;
-    });
+  findByLanguage(language: string): string[] {
+    var kernelspecs = this._kernelspecs;
+    var available = _sortedNames(kernelspecs);
+    var matches: string[] = [];
+    if (language && language.length > 0) {
+      available.map((name: string) => {
+        if (kernelspecs.get(name).spec.language.toLowerCase() === language.toLowerCase()) {
+            matches.push(name);
+        }
+      });
+    }
+    return matches;
   }
 
   private _kernelspecs: Map<string, IKernelSpecId>;
-  private _loaded: Promise<void>;
+  private _url = "unknown";
 }
 
 
