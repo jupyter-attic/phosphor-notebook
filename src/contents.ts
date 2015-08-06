@@ -195,7 +195,8 @@ class Contents implements IContents {
     };
     var url = this._getUrl(path);
     return utils.ajaxRequest(url, settings).then((success: IAjaxSuccess): IContentsModel => {
-      if (success.xhr.status !== 200) {
+      // will return 200 for an existing file and 201 for a new file
+      if (success.xhr.status !== 200 && success.xhr.status !== 201) {
         throw Error('Invalid Status: ' + success.xhr.status);
       }
       validateContentsModel(success.data);
