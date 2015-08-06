@@ -5,6 +5,12 @@ import utils = require('./utils');
 
 
 /**
+ * The url for the config service.
+ */
+var SERVICE_CONFIG_URL = 'api/config';
+
+
+/**
  * Configurable data section.
  */
 export 
@@ -14,12 +20,11 @@ class ConfigSection {
    * Create a config section.
    */
   constructor(sectionName: string, baseUrl: string) {
-    this._sectionName = sectionName;
-    this._baseUrl = baseUrl;
-    this._oneLoadFinished = false;
-    this._onLoaded = new Promise((resolve, reject) => {
-      this._finishFirstload = resolve;
-    });
+    this._url = utils.urlJoinEncode(baseUrl, SERVICE_CONFIG_URL, sectionName);
+
+    this._loaded = new Promise<any>((resolve, reject) => {
+      this._finishFirstLoad = resolve;
+    })
   }
 
   /**
@@ -30,30 +35,26 @@ class ConfigSection {
   }
 
   /**
-   * Return the onLoaded Promise.
+   * Promose fullfilled when the config section is first loaded.
    */
   get onLoaded(): Promise<any> {
-      return this._onLoaded;
-  }
-
-  /**
-   * Get the url for this section.
-   */
-  get apiUrl(): string {
-    return utils.urlJoinEncode(this._baseUrl, 'api/config', this._sectionName);
+    return this._loaded;
   }
   
   /**
    * Retrieve the data for this section.
    */
   load(): Promise<any> {
-    return utils.ajaxRequest(this.apiUrl, {
+    return utils.ajaxRequest(this._url, {
       method: "GET",
       dataType: "json",
-    }).then((data) => {
-      this._data = data;
+    }).then((success: utils.IAjaxSuccess) => {
+      if (success.xhr.status !== 200) {
+        throw Error('Invalid response');
+      }
+      this._data = success.data;
       this._loadDone();
-      return data;
+      return this._data;
     });
   }
   
@@ -62,37 +63,40 @@ class ConfigSection {
    * send the change to the server, and use the updated data from the server
    * when the reply comes.
    */
-  update(newdata: any) : any {
+  update(newdata: any): Promise<any> {
     utils.extend(this._data, newdata);  // true -> recursive update
     
-    return utils.ajaxRequest(this.apiUrl, {
+    return utils.ajaxRequest(this._url, {
       method : "PATCH",
       data: JSON.stringify(newdata),
       dataType : "json",
       contentType: 'application/json',
-    }).then((data) => {
-      this._data = data;
+    }).then((success: utils.IAjaxSuccess) => {
+      if (success.xhr.status !== 200) {
+        throw Error('Invalid response');
+      }
+      this._data = success.data;
       this._loadDone();
-      return data;
+      return this._data;
     });
   }
 
+
   /**
-   * Internal callback for handling load finished.
+   * Handle a finished load, fulfilling the onLoaded promise on the first call.
    */
   private _loadDone(): void {
     if (!this._oneLoadFinished) {
       this._oneLoadFinished = true;
-      this._finishFirstload();
+      this._finishFirstLoad();
     }
   }
 
-  private _sectionName = "unknown";
-  private _baseUrl = "unknown";
+  private _url = "unknown";
   private _data: any = null;
-  private _onLoaded: Promise<any> = null;
+  private _loaded: Promise<any> = null;
   private _oneLoadFinished = false;
-  private _finishFirstload: () => any = null;
+  private _finishFirstLoad: () => void = null;
 
 }
 
