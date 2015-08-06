@@ -540,6 +540,30 @@ paths:
             properties:
               kernelspec:
                 $ref: '#/definitions/KernelSpec'
+  /config/{section_name}:
+    get:
+      summary: Get a configuration section by name
+      tags:
+        - config
+      responses:
+        200:
+          description: Configuration object
+          schema:
+            type: object
+    patch:
+      summary: Update a configuration section by name
+      tags:
+        - config
+      parameters:
+        - name: configuration
+          in: body
+          schema:
+            type: object
+      responses:
+        200:
+          description: Configuration object
+          schema:
+            type: object
 
 definitions:
   KernelSpec:
@@ -697,3 +721,6 @@ definitions:
         type: string
         description: Last modified timestamp
         format: dateTime
+  Config:
+    description: A configuration object.
+    type: object
