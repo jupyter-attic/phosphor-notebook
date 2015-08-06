@@ -527,19 +527,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/KernelSpec'
-  /kernelspecs/{spec_name}:
-    get:
-      summary: Get a kernel spec by name
-      tags:
-        - kernelspecs
-      responses:
-        200:
-          description: Kernel spec
-          schema:
-            type: object
-            properties:
-              kernelspec:
-                $ref: '#/definitions/KernelSpec'
   /config/{section_name}:
     get:
       summary: Get a configuration section by name
