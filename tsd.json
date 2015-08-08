@@ -22,6 +22,15 @@
     },
     "requirejs/require.d.ts": {
       "commit": "7c374bf1e59ce14e9e28207e2ba2ab202ba55350"
+    },
+    "jquery/jquery.d.ts": {
+      "commit": "6f04d25ad38982d372cc3cda62fa4c0eef9e24d7"
+    },
+    "moment/moment.d.ts": {
+      "commit": "0fff32b558aa91ba24cfca5479aba02e4ef2fafe"
+    },
+    "moment/moment-node.d.ts": {
+      "commit": "0fff32b558aa91ba24cfca5479aba02e4ef2fafe"
     }
   }
 }

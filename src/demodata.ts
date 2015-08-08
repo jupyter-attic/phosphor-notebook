@@ -1,30 +1,33 @@
 import nbformat = require("./nbformat");
 
+
 var multiToString = function(x: string | string[]): string {
   return (typeof x === "string") ? x : x.join("");
 }
 
-var diskToMemory = function(disknb: any): nbformat.Notebook {
+var diskToMemory = function(disknb: any): nbformat.INotebookInterface {
   // Make a copy
   var nb = JSON.parse(JSON.stringify(disknb));
   // Convert multiline strings that are arrays to just strings
-  var cells = nb.cells;
-  for (var i = 0; i<cells.length; i++) {
-    var c = cells[i];
-    var c_type = c.cell_type;
+  var cells = new nbformat.BasicList<nbformat.ICell>(nb.cells);
+  for (var i = 0; i<cells.count; i++) {
+    var c = cells.get(i);
+    var c_type = (<nbformat.ICodeCell>c).cell_type;
     if (c_type === "raw" || c_type === "markdown" || c_type === "code") {
         c.source = multiToString(c.source)
     }
     if (c_type === "code") {
-      for (var j = 0; j < c.outputs.length; j++) {
-          var out = c.outputs[j];
+      var cc = <nbformat.CodeCell>c
+      for (var j = 0; j < cc.outputs.length; j++) {
+          var out = cc.outputs[j];
           switch (out.output_type) {
               case "stream":
-                  out.text = multiToString(out.text);
+                  var stream = <nbformat.Stream>out;
+                  stream.text = multiToString(stream.text);
                   break;
               case "execute_result":
               case "display_data":
-                  var d = out.data;
+                  var d = (<nbformat.DisplayData>out).data;
                   for (var key in d) {
                     if (d.hasOwnProperty(key) && key !== "application/json") {
                       d[key] = multiToString(d[key]);
@@ -35,7 +38,8 @@ var diskToMemory = function(disknb: any): nbformat.Notebook {
       }
     }
   }
-  return nb;
+  nb.cells = cells;
+  return nb
 }
 
 var notebook_disk = {
@@ -176,8 +180,8 @@ var notebook_disk = {
    "language": "python",
    "name": "python2"
   },
-  "language_info": {
-   "codemirror_mode": {
+"language_info": {
+ "codemirror_mode": {
     "name": "ipython",
     "version": 2
    },
@@ -193,4 +197,4 @@ var notebook_disk = {
  "nbformat_minor": 0
 }
 
-export var notebook: nbformat.Notebook = diskToMemory(notebook_disk);
+export var notebook: nbformat.INotebookInterface = diskToMemory(notebook_disk);

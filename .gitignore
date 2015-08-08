@@ -3,3 +3,4 @@ components
 typings
 dist
 build
+src/*.js

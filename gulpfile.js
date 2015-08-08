@@ -27,7 +27,16 @@ var tsSources = [
     "kernel",
     "session",
     "utils",
-    "serialize"
+    "serialize",
+    "driveutils",
+    "gapiutils",
+    "drivecontents",
+    "pickerutils",
+    "content_interface",
+    "notebook_model",
+    "rtmodel",
+    "gmodel",
+    "mockrtmodel",
 ].map(function(name) {return "./src/" + name + ".ts"; });
 
 
@@ -41,7 +50,7 @@ gulp.task('src', function() {
         typescript: typescript,
         experimentalDecorators: true,
         declarationFiles: true,
-        noImplicitAny: true,
+        noImplicitAny: false,
         target: 'ES5',
         module: 'amd'
     });
