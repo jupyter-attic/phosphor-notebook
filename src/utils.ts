@@ -118,9 +118,9 @@ function jsonToQueryString(json: any): string {
  * Input settings for an AJAX request.
  */
 export
-interface IAjaxSetttings {
+interface IAjaxSettings {
   method: string;
-  dataType: string;
+  dataType?: string;
   contentType?: string;
   data?: any;
 }
@@ -154,7 +154,7 @@ interface IAjaxError {
  * http://www.html5rocks.com/en/tutorials/es6/promises/#toc-promisifying-xmlhttprequest
  */
 export
-function ajaxRequest(url: string, settings: IAjaxSetttings): Promise<any> {
+function ajaxRequest(url: string, settings: IAjaxSettings): Promise<any> {
   return new Promise((resolve, reject) => {
     var req = new XMLHttpRequest();
     req.open(settings.method, url);
@@ -163,7 +163,8 @@ function ajaxRequest(url: string, settings: IAjaxSetttings): Promise<any> {
     }
     req.onload = () => {
       var response = req.response;
-      if (settings.dataType === 'json') {
+      if (settings.hasOwnProperty('dataType') && 
+          settings.dataType === 'json') {
         response = JSON.parse(req.response);
       }
       resolve({data: response, statusText: req.statusText, xhr: req});
